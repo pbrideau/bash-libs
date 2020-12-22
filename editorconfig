@@ -1,0 +1,24 @@
+# top-most EditorConfig file
+root = true
+
+[*]
+end_of_line = lf
+
+[*.py]
+indent_style = space
+indent_size  = 4
+
+[*.*sh]
+indent_style = tab
+tab_width    = 2
+
+shell_variant      = bash
+binary_next_line   = false # like -bn
+switch_case_indent = true  # like -ci
+space_redirects    = false # like -sr
+keep_padding       = false # like -kp
+end_of_line        = lf
+charset            = ascii
+trim_trailing_whitespace = true
+insert_final_newline     = false
+
