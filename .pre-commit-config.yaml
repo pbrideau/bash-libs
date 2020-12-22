@@ -1,0 +1,29 @@
+repos:
+- repo: https://github.com/jumanjihouse/pre-commit-hooks
+  rev: 2.1.4
+  hooks:
+    - id: forbid-binary
+      stages: [commit]
+    - id: script-must-have-extension
+      stages: [commit]
+    - id: script-must-not-have-extension
+      stages: [commit]
+    - id: shellcheck
+      stages: [commit]
+    - id: shfmt
+      stages: [commit]
+    - id: require-ascii
+      types: [shell]
+      stages: [commit]
+
+- repo: https://github.com/igorshubovych/markdownlint-cli
+  rev: v0.25.0
+  hooks:
+    - id: markdownlint
+      stages: [commit]
+
+- repo: https://github.com/jorisroovers/gitlint
+  rev: v0.15.0
+  hooks:
+    - id: gitlint
+      stages: [commit-msg]

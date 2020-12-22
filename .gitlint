@@ -1,0 +1,14 @@
+[general]
+ignore=B6
+#contrib=contrib-title-conventional-commits
+extra-path=.gitlint-rules
+
+#[contrib-title-conventional-commits]
+## Specify allowed commit types. For details see: https://www.conventionalcommits.org/
+## types = bugfix,user-story,epic
+#types = build,ci,docs,feat,fix,perf,refactor,style,test,chore
+
+[custom-contrib-title-conventional-commits]
+# Specify allowed commit types. For details see: https://www.conventionalcommits.org/
+# types = bugfix,user-story,epic
+types = build,ci,docs,feat,fix,perf,refactor,style,test,chore
