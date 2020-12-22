@@ -1,0 +1,266 @@
+#!/bin/bash -
+#===============================================================================
+#
+#         USAGE: ./template --help
+#
+#   DESCRIPTION: ---
+#
+#        AUTHOR: Patrick Brideau
+#       CREATED: 2020-11-24
+#      REVISION: ---
+#===============================================================================
+# template - 2020-11-24
+
+set -o nounset   # Treat unset variable as an error
+shopt -s extglob # Extended pattern matching
+
+################################################################################
+# Why doesn't set -e (or set -o errexit, or trap ERR) do what I expected?
+# http://mywiki.wooledge.org/BashFAQ/105
+#set -e             # Stop execution if there is an error
+#set -o pipefail    # pass the error to the rightmost element when pipe
+
+################################################################################
+# Return codes
+# Limit user-defined exit codes to the range 64-113
+# See /usr/include/sysexits.h for common examples
+export EX_USAGE=64 # Command line usage error
+
+################################################################################
+# Dependency
+function check_dependency {
+	# shellcheck disable=SC1090,SC1091
+	if [ -f "${DIRNAME}/common.sh" ]; then
+		source "${DIRNAME}/common.sh"
+	elif [ -f "$HOME/scripts/common.sh" ]; then
+		source "$HOME/scripts/common.sh"
+	else
+		echo "Could not find common.sh"
+		echo "Should be in ./ or in ~/scripts"
+		exit "$EX_NOTFOUND"
+	fi
+
+	if ! command -v getopt &>/dev/null; then
+		echo "This script require getopt, please install it"
+		exit "$EX_NOTFOUND"
+	fi
+}
+
+################################################################################
+# USAGE
+function usage {
+	cat <<-__END_OF_USAGE
+		Usage: $BASENAME [options] command
+
+		Examples:
+		  $BASENAME -b foobar run
+
+		Options:
+		   -h, --help                Show this message
+		   -d, --debug               Show debug log
+		   -v, --verbose             Show verbose log (multiple -v is --debug)
+		   -q, --quiet               Show only error logs (default warn)
+		   -y, --yes                 Answer YES to every questions asked
+		   -c, --config FILE         Use FILE as config, default:
+		                               1  ${DIRNAME}/${BASENAME%%.*}.conf
+		                               2  ~/.${BASENAME%%.*}.conf
+		                               3  /etc/${BASENAME%%.*}.conf
+		   --no-colors               Disable colored output
+		   --parseable               Make output easier to parse
+
+		   -f, --foo                 Do foo
+		   -b, --bar=BAZ             Do bar with BAZ
+
+		Commands:
+		   run                       Run the program
+
+		Return codes:
+		  64   EX_USAGE              Command line usage error
+		  125  EX_FAIL               Command itself fail
+		  127  EX_NOTFOUND           File not found
+	__END_OF_USAGE
+}
+
+################################################################################
+# MAIN
+function main {
+	log 3 "========== function ${FUNCNAME[0]}"
+
+	log 3 "This show a debug to stdout, when --debug"
+	log 2 "This show an info to stdout, when --verbose"
+	log 1 "This show a warning to stdout"
+	log 0 "This show an error to stderr"
+
+}
+
+function slp {
+	sleep 1 &
+	spinner $! sleeping
+	log 2 'Finished'
+}
+
+function ask_user {
+	prompt_user_abort "Do you want to continue?" "$ALWAYS_YES"
+	log 2 "Finished"
+}
+
+function validate_inputs {
+	log 3 "========== function ${FUNCNAME[0]}"
+	log 3 "var_a: $VAR_A"
+	log 3 "var_b: $VAR_B"
+}
+
+trap sigusr1 SIGUSR1
+function sigusr1 {
+	# Trigger this with kill -s USR1 <pid>
+	echo
+	log 3 "Signal SIGUSR1 received"
+}
+
+################################################################################
+# ARGS PARSE
+function load_arg {
+	declare -A OPTIONS=(
+		['h']='help'
+		['d']='debug'
+		['v']='verbose'
+		['q']='quiet'
+		['y']='yes'
+		['c:']='config:'
+
+		['f']='foo'
+		['b:']='bar:'
+	)
+	declare -a OPTIONS_NOSHORT=(
+		'no-colors'
+		'parseable'
+	)
+
+	IFS=','
+	LONG_OPTIONS="${OPTIONS[*]},${OPTIONS_NOSHORT[*]}"
+	IFS=''
+	SHORT_OPTIONS="${!OPTIONS[*]}"
+	unset IFS
+
+	opt=$(getopt -o "$SHORT_OPTIONS" --long "$LONG_OPTIONS" -- "$@")
+	rc=$?
+	if [ "$rc" -ne 0 ]; then
+		exit "$EX_USAGE"
+	fi
+	eval set -- "$opt"
+	unset opt rc
+	while true; do
+		case "$1" in
+		-h | --help)
+			usage
+			exit 0
+			;;
+		-d | --debug)
+			LOG_LEVEL=3
+			;;
+		-v | --verbose)
+			LOG_LEVEL=$LOG_LEVEL+1
+			;;
+		-q | --quiet)
+			LOG_LEVEL=0
+			;;
+		-y | --yes)
+			ALWAYS_YES=true
+			;;
+		--no-colors)
+			COLORS=false
+			;;
+		--parseable)
+			COLORS=false
+			PARSEABLE=true
+			;;
+		-c | --config)
+			shift
+			CONFIG_FILES=("$1")
+			;;
+		-f | --foo)
+			VAR_A='foobar'
+			;;
+		-b | --bar)
+			shift
+			VAR_B=$1
+			;;
+		--)
+			shift
+			break
+			;;
+		*)
+			log 0 "No such parameter: '$1'"
+			exit "$EX_FAIL"
+			;;
+		esac
+		shift
+	done
+	END_LOAD_ARG=("$@")
+}
+
+BASENAME=$(basename "$0")
+DIRNAME="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+export CONFIG_FILES=(
+	"${DIRNAME}/${BASENAME%%.*}.conf"
+	"${HOME}/.${BASENAME%%.*}.conf"
+	"/etc/${BASENAME%%.*}.conf"
+)
+export COLORS=true
+export PARSEABLE=false
+export ALWAYS_YES=false
+declare -gi LOG_LEVEL=1
+
+VAR_A='default_value'
+VAR_B='default_value'
+
+################################################################################
+# Start functions
+if [ "${BASH_SOURCE[0]}" = "${0}" ]; then
+	check_dependency
+	set_colors false
+
+	declare -a END_LOAD_ARG
+	load_arg "$@"
+	eval set --
+	if [ "${#END_LOAD_ARG[@]}" -gt 0 ]; then
+		for arg in "${END_LOAD_ARG[@]}"; do
+			eval set -- "$@" "'$arg'"
+		done
+	fi
+
+	load_config "${CONFIG_FILES[@]}"
+	validate_inputs
+
+	set_colors $COLORS
+
+	if [ $# -eq 0 ]; then
+		log 0 'No command given'
+		usage
+		exit $EX_USAGE
+	fi
+
+	if [ $# -eq 1 ]; then
+		log 3 "pid: $$"
+		case "$1" in
+		run)
+			main
+			;;
+		sleep)
+			slp
+			;;
+		ask)
+			ask_user
+			;;
+		*)
+			log 0 "No such command: $1"
+			log 0 "See --help for more details"
+			exit "$EX_USAGE"
+			;;
+		esac
+	else
+		log 0 "Too many commands given:" "$@"
+		log 0 "see --help"
+		exit "$EX_USAGE"
+	fi
+fi
