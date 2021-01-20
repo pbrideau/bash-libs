@@ -40,7 +40,7 @@ function check_dependency {
 		exit "$EX_NOTFOUND"
 	fi
 
-	if ! command -v getopt &>/dev/null; then
+	if ! command -v getopt &> /dev/null; then
 		echo "This script require getopt, please install it"
 		exit "$EX_NOTFOUND"
 	fi
@@ -49,7 +49,7 @@ function check_dependency {
 ################################################################################
 # USAGE
 function usage {
-	cat <<-__END_OF_USAGE
+	cat <<- __END_OF_USAGE
 		Usage: $BASENAME [options] command
 
 		Examples:
@@ -151,48 +151,48 @@ function load_arg {
 	unset opt rc
 	while true; do
 		case "$1" in
-		-h | --help)
-			usage
-			exit 0
-			;;
-		-d | --debug)
-			LOG_LEVEL=3
-			;;
-		-v | --verbose)
-			LOG_LEVEL=$LOG_LEVEL+1
-			;;
-		-q | --quiet)
-			LOG_LEVEL=0
-			;;
-		-y | --yes)
-			ALWAYS_YES=true
-			;;
-		--no-colors)
-			COLORS=false
-			;;
-		--parseable)
-			COLORS=false
-			PARSEABLE=true
-			;;
-		-c | --config)
-			shift
-			CONFIG_FILES=("$1")
-			;;
-		-f | --foo)
-			VAR_A='foobar'
-			;;
-		-b | --bar)
-			shift
-			VAR_B=$1
-			;;
-		--)
-			shift
-			break
-			;;
-		*)
-			log 0 "No such parameter: '$1'"
-			exit "$EX_FAIL"
-			;;
+			-h | --help)
+				usage
+				exit 0
+				;;
+			-d | --debug)
+				LOG_LEVEL=3
+				;;
+			-v | --verbose)
+				LOG_LEVEL=$LOG_LEVEL+1
+				;;
+			-q | --quiet)
+				LOG_LEVEL=0
+				;;
+			-y | --yes)
+				ALWAYS_YES=true
+				;;
+			--no-colors)
+				COLORS=false
+				;;
+			--parseable)
+				COLORS=false
+				PARSEABLE=true
+				;;
+			-c | --config)
+				shift
+				CONFIG_FILES=("$1")
+				;;
+			-f | --foo)
+				VAR_A='foobar'
+				;;
+			-b | --bar)
+				shift
+				VAR_B=$1
+				;;
+			--)
+				shift
+				break
+				;;
+			*)
+				log 0 "No such parameter: '$1'"
+				exit "$EX_FAIL"
+				;;
 		esac
 		shift
 	done
@@ -243,20 +243,20 @@ if [ "${BASH_SOURCE[0]}" = "${0}" ]; then
 	if [ $# -eq 1 ]; then
 		log 3 "pid: $$"
 		case "$1" in
-		run)
-			main
-			;;
-		sleep)
-			slp
-			;;
-		ask)
-			ask_user
-			;;
-		*)
-			log 0 "No such command: $1"
-			log 0 "See --help for more details"
-			exit "$EX_USAGE"
-			;;
+			run)
+				main
+				;;
+			sleep)
+				slp
+				;;
+			ask)
+				ask_user
+				;;
+			*)
+				log 0 "No such command: $1"
+				log 0 "See --help for more details"
+				exit "$EX_USAGE"
+				;;
 		esac
 	else
 		log 0 "Too many commands given:" "$@"

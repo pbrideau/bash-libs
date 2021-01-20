@@ -111,7 +111,7 @@ function spinner {
 	if [ "$PARSEABLE" = true ]; then
 		log 1 "running: $process_name"
 	fi
-	while ps -q "$job" &>/dev/null; do
+	while ps -q "$job" &> /dev/null; do
 		if [ "$LOG_LEVEL" -ne 0 ]; then
 			if [ "$PARSEABLE" = true ]; then
 				echo -n '.'
@@ -208,7 +208,7 @@ function set_colors {
 
 	export COLORS_SET=true
 
-	if ! command -v tput &>/dev/null; then
+	if ! command -v tput &> /dev/null; then
 		log 1 "tput command not found, no colors will be displayed"
 		colors=false
 	elif ! tty -s; then
@@ -264,7 +264,7 @@ function load_config {
 					fi
 				fi
 				_=$((linenum++))
-			done <"$f"
+			done < "$f"
 			log 2 "Config '$f' loaded"
 			# Load only the first config we can find, not every config files
 			break

@@ -3,7 +3,7 @@
 # This is a list of common tricks to be used within bash scripts
 
 function run_awk_within_bash {
-	read -r -d '' awk_code <<-_EOF
+	read -r -d '' awk_code <<- _EOF
 		#+BEGIN_SRC awk
 		BEGIN {
 			print "Hello, world!"
