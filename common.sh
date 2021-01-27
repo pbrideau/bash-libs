@@ -289,7 +289,10 @@ function basename {
 
 	tmp=${1%"${1##*[!/]}"}
 	tmp=${tmp##*/}
-	tmp=${tmp%"${2/"$tmp"/}"}
+
+	if [ $# -eq 2 ]; then
+		tmp=${tmp%"${2/"$tmp"/}"}
+	fi
 
 	printf '%s\n' "${tmp:-/}"
 }
