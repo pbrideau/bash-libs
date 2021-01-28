@@ -12,9 +12,6 @@ repos:
       stages: [commit]
     - id: shfmt
       stages: [commit]
-    - id: require-ascii
-      types: [shell]
-      stages: [commit]
 
 - repo: https://github.com/igorshubovych/markdownlint-cli
   rev: v0.25.0

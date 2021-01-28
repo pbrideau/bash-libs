@@ -11,7 +11,7 @@ switch_case_indent = true  # like -ci
 space_redirects    = true  # like -sr
 keep_padding       = false # like -kp
 end_of_line        = lf
-charset            = ascii
+charset            = utf8
 trim_trailing_whitespace = true
 insert_final_newline     = false
 
