@@ -22,7 +22,6 @@ function Should_LogErrorToStderr_When_Log0 { #@test
 	# No way to check if it's stdout or stderr with bats...
 	# Assume it's in stderr
 }
-
 function Should_LogWarningToStdout_When_Log1 { #@test
 	# Given
 	export LOG_LEVEL=1
@@ -34,7 +33,6 @@ function Should_LogWarningToStdout_When_Log1 { #@test
 	[ "$status" -eq 0 ]
 	[ "${lines[0]}" = "[warn ] Warning" ]
 }
-
 function Should_LogInfoToStdout_When_Log2 { #@test
 	# Given
 	export LOG_LEVEL=2
@@ -46,7 +44,6 @@ function Should_LogInfoToStdout_When_Log2 { #@test
 	[ "$status" -eq 0 ]
 	[ "${lines[0]}" = "[info ] Info" ]
 }
-
 function Should_LogDebugToStdout_When_Log3 { #@test
 	# Given
 	export LOG_LEVEL=3
@@ -58,7 +55,6 @@ function Should_LogDebugToStdout_When_Log3 { #@test
 	[ "$status" -eq 0 ]
 	[ "${lines[0]}" = "[debug] Debug" ]
 }
-
 function Should_Fail_When_LogAnythingElse { #@test
 	# Given
 
@@ -78,7 +74,6 @@ function Should_Fail_When_AnswerNoToPromptUserAbort { #@test
 	# Then
 	[ "$status" -eq 1 ]
 }
-
 function Should_Succeed_When_AnswerYesToPromptUserAbort { #@test
 	# Given
 
@@ -88,7 +83,6 @@ function Should_Succeed_When_AnswerYesToPromptUserAbort { #@test
 	# Then
 	[ "$status" -eq 0 ]
 }
-
 function Should_Succeed_When_AutoAnswerToPromptUserAbort { #@test
 	# Given
 
@@ -109,7 +103,6 @@ function Should_ReturnName_When_FullPath { #@test
 	[ "$status" -eq 0 ]
 	[ "${lines[0]}" = "baz" ]
 }
-
 function Should_ReturnName_When_FullPathWithSpaces { #@test
 	# Given
 
@@ -131,7 +124,6 @@ function Should_ReturnDirName_When_FullPath { #@test
 	[ "$status" -eq 0 ]
 	[ "${lines[0]}" = "/foo/bar" ]
 }
-
 function Should_ReturnDir_When_FullPathWithSpaces { #@test
 	# Given
 
