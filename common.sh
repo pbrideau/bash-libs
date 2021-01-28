@@ -46,6 +46,44 @@ function log {
 }
 
 #---  FUNCTION  ----------------------------------------------------------------
+#          NAME:  log_chkbox
+#   DESCRIPTION:  Output checkbox message to stdout
+#       GLOBALS:
+#    PARAMETERS:  1) string: What kind of checkbox to display
+#                      empty
+#                      ok
+#                      error
+#                 2) string: Text to display
+#        OUTPUT:  message to stdout
+#       RETURNS:
+#-------------------------------------------------------------------------------
+function log_chkbox {
+	if [ "${COLORS_SET:-unset}" = "unset" ]; then
+		set_colors false
+	fi
+
+	if [[ ! "$1" =~ (empty|ok|error) ]]; then
+		log 0 "Checkbox should be one of 'empty,ok,error'"
+		exit "$EX_FAIL"
+	fi
+
+	local chkbox_type=$1
+	shift
+
+	case "$chkbox_type" in
+		empty)
+			echo -en "[ ]" "$@"
+			;;
+		ok)
+			echo -e "${txtcr}${txtrst}[${bldgrn}✔${txtrst}]" "$@"
+			;;
+		error)
+			echo -e "${txtcr}${txtrst}[${bldred}✘${txtrst}]" "$@"
+			;;
+	esac
+}
+
+#---  FUNCTION  ----------------------------------------------------------------
 #          NAME:  prompt_user_abort
 #   DESCRIPTION:  Ask user if he wants to continue, stop script otherwise
 #       GLOBALS:
