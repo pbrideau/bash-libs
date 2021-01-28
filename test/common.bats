@@ -113,6 +113,16 @@ function Should_ReturnName_When_FullPathWithSpaces { #@test
 	[ "$status" -eq 0 ]
 	[ "${lines[0]}" = "baz" ]
 }
+function Should_ReturnNameWithoutExtension_When_FullPathWithExclude { #@test
+	# Given
+
+	# When
+	run basename "/foo/bar.baz" ".baz"
+
+	# Then
+	[ "$status" -eq 0 ]
+	[ "${lines[0]}" = "bar" ]
+}
 
 function Should_ReturnDirName_When_FullPath { #@test
 	# Given
