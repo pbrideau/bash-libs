@@ -130,7 +130,7 @@ function prompt_user_abort {
 #        OUTPUT:  spinner
 #       RETURNS:
 #         USAGE:  sleep 10 &
-#                 sleeper $! job_name
+#                 spinner $! job_name
 #-------------------------------------------------------------------------------
 function spinner {
 	log 3 "========== function ${FUNCNAME[0]}"
@@ -155,17 +155,17 @@ function spinner {
 				echo -n '.'
 			else
 				temp="${spinstr#?}"
-				printf "${txtcr}[${txtylw}warn ${txtrst}] running: %s (%ds) %c" \
+				printf "${txtcr}[%c] %s (%ds)" \
+					"${spinstr}" \
 					"$process_name" \
-					"$((SECONDS - start_time))" \
-					"${spinstr}"
+					"$((SECONDS - start_time))"
 				spinstr=${temp}${spinstr%"$temp"}
 			fi
 		fi
 		sleep 1
 	done
 	if [ "$LOG_LEVEL" -ne 0 ]; then
-		echo
+		echo -e "${txtcr}[${bldgrn}✔${txtrst}]"
 	fi
 }
 
