@@ -84,37 +84,37 @@ function version {
 ################################################################################
 # USAGE
 function usage {
-	cat <<- __END_OF_USAGE
-		Usage: $BASENAME [options] command
-
-		Examples:
-		  $BASENAME -b foobar run
-
-		Options:
-		   -h, --help                Show this message
-		   -d, --debug               Show debug log
-		   -v, --verbose             Show verbose log (multiple -v is --debug)
-		   -q, --quiet               Show only error logs (default warn)
-		   -V, --version             Display script version and exit
-		   -y, --yes                 Answer YES to every questions asked
-		   -c, --config FILE         Use FILE as config, default:
-		                               1  ${DIRNAME}/${BASENAME%%.*}.conf
-		                               2  ~/.${BASENAME%%.*}.conf
-		                               3  /etc/${BASENAME%%.*}.conf
-		   --no-colors               Disable colored output
-		   --parseable               Make output easier to parse
-
-		   -f, --foo                 Do foo
-		   -b, --bar=BAZ             Do bar with BAZ
-
-		Commands:
-		   run                       Run the program
-
-		Return codes:
-		  64   EX_USAGE              Command line usage error
-		  125  EX_FAIL               Command itself fail
-		  127  EX_NOTFOUND           File not found
-	__END_OF_USAGE
+	echo "Usage: $BASENAME [options] command"
+	echo
+	echo "Examples:"
+	echo "  $BASENAME -vv run"
+	echo "  $BASENAME --bar foobar run"
+	echo "  $BASENAME --config /etc/config_file run"
+	echo
+	echo "Options:"
+	echo "   -h, --help                Show this message"
+	echo "   -d, --debug               Show debug log"
+	echo "   -v, --verbose             Show verbose log (multiple -v is --debug)"
+	echo "   -q, --quiet               Show only error logs (default warn)"
+	echo "   -V, --version             Display script version and exit"
+	echo "   -y, --yes                 Answer YES to every questions asked"
+	echo "   -c, --config FILE         Use FILE as config, default:"
+	echo "                               1  ${DIRNAME}/${BASENAME%%.*}.conf"
+	echo "                               2  ~/.${BASENAME%%.*}.conf"
+	echo "                               3  /etc/${BASENAME%%.*}.conf"
+	echo "   --no-colors               Disable colored output"
+	echo "   --parseable               Make output easier to parse"
+	echo
+	echo "   -f, --foo                 Do foo"
+	echo "   -b, --bar=BAZ             Do bar with BAZ"
+	echo
+	echo "Commands:"
+	echo "   run                       Run the program"
+	echo
+	echo "Return codes:"
+	echo "  64   EX_USAGE              Command line usage error"
+	echo "  125  EX_FAIL               Command itself fail"
+	echo "  127  EX_NOTFOUND           File not found"
 }
 
 ################################################################################
