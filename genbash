@@ -137,9 +137,8 @@ function main {
 		ver=$(awk -F "=" '/COMMON_VERSION/ {print $2}' "$BASH_COMMON")
 		sed -i -re "s/(REQUIRED_COMMON_VERSION=).*/\1$ver/" "$TARGET_TEMPLATE"
 
-		sed -i -re " \
-			/^[[:space:]]*## --common insert ##/, \
-			/^[[:space:]]*## --common retcode ##/d" \
+		sed -i -re "/^[[:space:]]*## --common insert ##/d" \
+			-e "/^[[:space:]]*## --common retcode ##/d" \
 			"$TARGET_TEMPLATE"
 	fi
 
