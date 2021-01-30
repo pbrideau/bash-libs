@@ -7,6 +7,8 @@
 #      REVISION: ---
 #===============================================================================
 # template: 2021.01.29
+VERSION="0.0.1"
+REQUIRED_COMMON_VERSION="2021.01.29"
 
 set -o nounset   # Treat unset variable as an error
 shopt -s extglob # Extended pattern matching
@@ -26,21 +28,57 @@ export EX_USAGE=64 # Command line usage error
 ################################################################################
 # Dependency
 function check_dependency {
+	local common_path
 	# shellcheck disable=SC1090,SC1091
 	if [ -f "${DIRNAME}/common.sh" ]; then
 		source "${DIRNAME}/common.sh"
+		common_path="${DIRNAME}/common.sh"
 	elif [ -f "$HOME/scripts/common.sh" ]; then
 		source "$HOME/scripts/common.sh"
+		common_path="$HOME/scripts/common.sh"
 	else
 		echo "Could not find common.sh"
 		echo "Should be in ./ or in ~/scripts"
 		exit "$EX_NOTFOUND"
 	fi
 
+	function echo_common_version {
+		echo "This script require common.sh >= v$REQUIRED_COMMON_VERSION"
+		echo "But v$COMMON_VERSION found"
+		echo "(loaded from $common_path)"
+		exit "$EX_FAIL"
+	}
+	if [ "${COMMON_VERSION:0:4}" -lt "${REQUIRED_COMMON_VERSION:0:4}" ]; then
+		echo_required_version
+	elif [ "${COMMON_VERSION:5:2}" -lt "${REQUIRED_COMMON_VERSION:5:2}" ]; then
+		echo_required_version
+	elif [ "${COMMON_VERSION:8:2}" -lt "${REQUIRED_COMMON_VERSION:8:2}" ]; then
+		echo_required_version
+	fi
 	if ! command -v getopt &> /dev/null; then
 		echo "This script require getopt, please install it"
 		exit "$EX_NOTFOUND"
 	fi
+}
+
+################################################################################
+# VERSION
+function version {
+	echo "$BASENAME, version $VERSION"
+	echo "Copyright (C) 2020-2021 Patrick Brideau"
+	echo
+	echo "This program is free software: you can redistribute it and/or modify"
+	echo "it under the terms of the GNU General Public License as published by"
+	echo "the Free Software Foundation, either version 3 of the License, or"
+	echo "(at your option) any later version."
+	echo
+	echo "This program is distributed in the hope that it will be useful,"
+	echo "but WITHOUT ANY WARRANTY; without even the implied warranty of"
+	echo "MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the"
+	echo "GNU General Public License for more details."
+	echo
+	echo "You should have received a copy of the GNU General Public License"
+	echo "along with this program.  If not, see <https://www.gnu.org/licenses/>."
 }
 
 ################################################################################
@@ -57,6 +95,7 @@ function usage {
 		   -d, --debug               Show debug log
 		   -v, --verbose             Show verbose log (multiple -v is --debug)
 		   -q, --quiet               Show only error logs (default warn)
+		   -V, --version             Display script version and exit
 		   -y, --yes                 Answer YES to every questions asked
 		   -c, --config FILE         Use FILE as config, default:
 		                               1  ${DIRNAME}/${BASENAME%%.*}.conf
@@ -122,6 +161,7 @@ function load_arg {
 		['d']='debug'
 		['v']='verbose'
 		['q']='quiet'
+		['V']='version'
 		['y']='yes'
 		['c:']='config:'
 
@@ -160,6 +200,10 @@ function load_arg {
 				;;
 			-q | --quiet)
 				LOG_LEVEL=0
+				;;
+			-V | --version)
+				version
+				exit
 				;;
 			-y | --yes)
 				ALWAYS_YES=true
