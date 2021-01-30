@@ -131,12 +131,12 @@ function spinner {
 	local temp
 
 	log 3 "background job pid: $job"
-	if [ "$PARSEABLE" = true ]; then
+	if [ "${PARSEABLE:-false}" = true ]; then
 		log 1 "running: $process_name"
 	fi
 	while ps -q "$job" &> /dev/null; do
 		if [ "$LOG_LEVEL" -ne 0 ]; then
-			if [ "$PARSEABLE" = true ]; then
+			if [ "${PARSEABLE:-false}" = true ]; then
 				echo -n '.'
 			else
 				temp="${spinstr#?}"
@@ -149,7 +149,7 @@ function spinner {
 		fi
 		sleep 1
 	done
-	if [ "$LOG_LEVEL" -ne 0 ]; then
+	if [ "$LOG_LEVEL" -ne 0 ] && [ "${PARSEABLE:-false}" = false ]; then
 		echo -e "${txtcr}[${bldgrn}✔${txtrst}]"
 	fi
 }
