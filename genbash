@@ -118,12 +118,12 @@ function main {
 	cp "$BASH_TEMPLATE" "$TARGET_TEMPLATE"
 	chmod +x "$TARGET_TEMPLATE"
 
-	reformat_template 'set-e' "$NO_SETE"
-	reformat_template 'common' "$NO_COMMON"
-	reformat_template 'config' "$NO_CONFIG"
-	reformat_template 'example' "$NO_EXAMPLE"
-	reformat_template 'parseable' "$NO_PARSEABLE"
-	reformat_template 'yes' "$NO_YES"
+	reformat_template 'set-e' "$REMOVE_SETE"
+	reformat_template 'common' "$REMOVE_COMMON"
+	reformat_template 'config' "$REMOVE_CONFIG"
+	reformat_template 'example' "$REMOVE_EXAMPLE"
+	reformat_template 'parseable' "$REMOVE_PARSEABLE"
+	reformat_template 'yes' "$REMOVE_YES"
 
 	sed -i -re "s/CREATED: ---/CREATED: $(date +%F)/" "$TARGET_TEMPLATE"
 
@@ -154,7 +154,7 @@ function validate_inputs {
 		exit "$EX_ERROR"
 	fi
 
-	if [ "$NO_COMMON" = true ]; then
+	if [ "$REMOVE_COMMON" = true ]; then
 		log 1 'Function log() and set_colors() are required'
 		log 1 'They will be added inline in your script'
 		prompt_user_abort 'Do you want to continue?'
@@ -237,24 +237,24 @@ function load_arg {
 				COLORS=false
 				;;
 			--set-e)
-				NO_SETE=false
+				REMOVE_SETE=false
 				;;
 			--common)
-				NO_COMMON=false
+				REMOVE_COMMON=false
 				;;
 			--config)
-				NO_CONFIG=false
+				REMOVE_CONFIG=false
 				;;
 			--example)
-				NO_COMMON=false
-				NO_EXAMPLE=false
-				NO_YES=false
+				REMOVE_COMMON=false
+				REMOVE_EXAMPLE=false
+				REMOVE_YES=false
 				;;
 			--parseable)
-				NO_PARSEABLE=false
+				REMOVE_PARSEABLE=false
 				;;
 			--yes)
-				NO_YES=false
+				REMOVE_YES=false
 				;;
 			--)
 				shift
@@ -279,12 +279,12 @@ fi
 export COLORS=true
 declare -gi LOG_LEVEL=1
 
-NO_SETE=true
-NO_COMMON=true
-NO_CONFIG=true
-NO_EXAMPLE=true
-NO_PARSEABLE=true
-NO_YES=true
+REMOVE_SETE=true
+REMOVE_COMMON=true
+REMOVE_CONFIG=true
+REMOVE_EXAMPLE=true
+REMOVE_PARSEABLE=true
+REMOVE_YES=true
 
 ################################################################################
 # Start functions
