@@ -1,0 +1,369 @@
+#!/bin/bash -
+#===============================================================================
+#   DESCRIPTION: Generate a bash script template
+#
+#        AUTHOR: Patrick Brideau
+#       CREATED: 2021-01-29
+#      REVISION: ---
+#===============================================================================
+# template: 2021.01.29
+VERSION="0.0.1"
+REQUIRED_COMMON_VERSION="2021.01.29"
+
+set -o nounset   # Treat unset variable as an error
+shopt -s extglob # Extended pattern matching
+
+################################################################################
+# Return codes
+# Limit user-defined exit codes to the range 64-113
+# See /usr/include/sysexits.h for common examples
+export EX_USAGE=64 # Command line usage error
+
+################################################################################
+# Dependency
+function check_dependency {
+	local common_path
+	if [ -f "${DIRNAME}/common.sh" ]; then
+		# shellcheck source=./common.sh
+		source "${DIRNAME}/common.sh"
+		common_path="${DIRNAME}/common.sh"
+	elif [ -f "$HOME/.local/share/bash-libs/common.sh" ]; then
+		# shellcheck disable=SC1090
+		source "$HOME/.local/share/bash-libs/common.sh"
+		common_path="$HOME/.local/share/bash-libs/common.sh"
+	else
+		echo "Could not find common.sh"
+		echo "Should be in ./ or in ~/.local"
+		exit "$EX_NOTFOUND"
+	fi
+
+	function echo_required_version {
+		echo "This script require common.sh >= v$REQUIRED_COMMON_VERSION"
+		echo "But v$COMMON_VERSION found"
+		echo "(loaded from $common_path)"
+		exit "$EX_FAIL"
+	}
+	if [ "${COMMON_VERSION:0:4}" -lt "${REQUIRED_COMMON_VERSION:0:4}" ]; then
+		echo_required_version
+	elif [ "${COMMON_VERSION:5:2}" -lt "${REQUIRED_COMMON_VERSION:5:2}" ]; then
+		echo_required_version
+	elif [ "${COMMON_VERSION:8:2}" -lt "${REQUIRED_COMMON_VERSION:8:2}" ]; then
+		echo_required_version
+	fi
+
+	if ! command -v getopt &> /dev/null; then
+		echo "This script require getopt, please install it"
+		exit "$EX_NOTFOUND"
+	fi
+}
+
+################################################################################
+# VERSION
+function version {
+	echo "$BASENAME, version $VERSION"
+	echo "Copyright (C) 2020-2021 Patrick Brideau"
+	echo
+	echo "This program is free software: you can redistribute it and/or modify"
+	echo "it under the terms of the GNU General Public License as published by"
+	echo "the Free Software Foundation, either version 3 of the License, or"
+	echo "(at your option) any later version."
+	echo
+	echo "This program is distributed in the hope that it will be useful,"
+	echo "but WITHOUT ANY WARRANTY; without even the implied warranty of"
+	echo "MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the"
+	echo "GNU General Public License for more details."
+	echo
+	echo "You should have received a copy of the GNU General Public License"
+	echo "along with this program.  If not, see <https://www.gnu.org/licenses/>."
+}
+
+################################################################################
+# USAGE
+function usage {
+	echo "Usage: $BASENAME [options] Target"
+	echo
+	echo "Examples:"
+	echo "  $BASENAME --config my_new_script"
+	echo "  $BASENAME --config /home/foobar/my_new_script"
+	echo
+	echo "Options:"
+	echo "   -h, --help                Show this message"
+	echo "   -d, --debug               Show debug log"
+	echo "   -v, --verbose             Show verbose log (multiple -v is --debug)"
+	echo "   -q, --quiet               Show only error logs (default warn)"
+	echo "   -V, --version             Display script version and exit"
+	echo "   --no-colors               Disable colored output"
+	echo
+	echo "Template options:"
+	echo "   --common                  Enable source of common.sh"
+	echo "   --example                 Enable examples"
+	echo "   --config                  Enable config parsing"
+	echo "   --yes                     Enable always-yes"
+	echo "   --parseable               Enable parseable"
+	echo "   --set-e                   Enable set -e at the start of the script"
+	echo
+	echo "Return codes:"
+	echo "  64   EX_USAGE              Command line usage error"
+	echo "  125  EX_FAIL               Command itself fail"
+	echo "  127  EX_NOTFOUND           File not found"
+}
+
+################################################################################
+# MAIN
+function main {
+	log 3 "========== function ${FUNCNAME[0]}"
+
+	log 2 "Generating bash script : $TARGET_TEMPLATE"
+
+	cp "$BASH_TEMPLATE" "$TARGET_TEMPLATE"
+	chmod +x "$TARGET_TEMPLATE"
+
+	if [ "$NO_SETE" = true ]; then
+		sed -i -re " \
+			/^[[:space:]]*## --set-e start ##/, \
+			/^[[:space:]]*## --set-e end ##/d" \
+			"$TARGET_TEMPLATE"
+	else
+		sed -i -re "/^[[:space:]]*## --set-e start ##/d" \
+			-e "/^[[:space:]]*## --set-e end ##/d" \
+			"$TARGET_TEMPLATE"
+	fi
+
+	if [ "$NO_COMMON" = true ]; then
+		trap 'rm "$TARGET_TEMPLATE"' EXIT
+		log 1 'function log() and set_colors() are required'
+		log 1 'you will have to add them manually'
+		prompt_user_abort 'Do you want to continue?'
+		trap - EXIT
+		sed -i -re " \
+			/^[[:space:]]*## --common start ##/, \
+			/^[[:space:]]*## --common end ##/d" \
+			"$TARGET_TEMPLATE"
+	else
+		sed -i -re "/^[[:space:]]*## --common start ##/d" \
+			-e "/^[[:space:]]*## --common end ##/d" \
+			"$TARGET_TEMPLATE"
+	fi
+
+	if [ "$NO_CONFIG" = true ]; then
+		sed -i -re " \
+			/^[[:space:]]*## --config start ##/, \
+			/^[[:space:]]*## --config end ##/d" \
+			"$TARGET_TEMPLATE"
+	else
+		sed -i -re "/^[[:space:]]*## --config start ##/d" \
+			-e "/^[[:space:]]*## --config end ##/d" \
+			"$TARGET_TEMPLATE"
+	fi
+
+	if [ "$NO_EXAMPLE" = true ]; then
+		sed -i -re " \
+			/^[[:space:]]*## --example start ##/, \
+			/^[[:space:]]*## --example end ##/d" \
+			"$TARGET_TEMPLATE"
+	else
+		sed -i -re "/^[[:space:]]*## --example start ##/d" \
+			-e "/^[[:space:]]*## --example end ##/d" \
+			"$TARGET_TEMPLATE"
+		log 1 "Note that --examples requires the following:"
+		log 1 "  --common"
+		log 1 "  --yes"
+		#log 1 "  --parseable"
+	fi
+
+	if [ "$NO_PARSEABLE" = true ]; then
+		sed -i -re " \
+			/^[[:space:]]*## --parseable start ##/, \
+			/^[[:space:]]*## --parseable end ##/d" \
+			"$TARGET_TEMPLATE"
+	else
+		sed -i -re "/^[[:space:]]*## --parseable start ##/d" \
+			-e "/^[[:space:]]*## --parseable end ##/d" \
+			"$TARGET_TEMPLATE"
+	fi
+
+	if [ "$NO_YES" = true ]; then
+		sed -i -re " \
+			/^[[:space:]]*## --yes start ##/, \
+			/^[[:space:]]*## --yes end ##/d" \
+			"$TARGET_TEMPLATE"
+	else
+		sed -i -re "/^[[:space:]]*## --yes start ##/d" \
+			-e "/^[[:space:]]*## --yes end ##/d" \
+			"$TARGET_TEMPLATE"
+	fi
+
+	sed -i -re "s/CREATED: ---/CREATED: $(date +%F)/" "$TARGET_TEMPLATE"
+
+	# shellcheck disable=SC2154
+	# bldgrn and txtrst are defined in common.sh but shellcheck cannot find them
+	log chkok "${bldgrn}$TARGET_TEMPLATE${txtrst} created successfully"
+}
+
+function validate_inputs {
+	log 3 "========== function ${FUNCNAME[0]}"
+	if [ -e "$TARGET_TEMPLATE" ]; then
+		log 0 "File '$TARGET_TEMPLATE' already exists"
+		exit "$EX_ERROR"
+	fi
+
+	if ! touch "$TARGET_TEMPLATE" &> /dev/null; then
+		log 0 "Cannot write to '$TARGET_TEMPLATE'"
+		exit "$EX_ERROR"
+	fi
+
+	TARGET_TEMPLATE=$(readlink -f "$TARGET_TEMPLATE")
+
+	#Locate bash-template
+	if [ -e "${DIRNAME}/bash-template" ]; then
+		BASH_TEMPLATE="${DIRNAME}/bash-template"
+	elif [ -e "${HOME}/.local/share/bash-libs/bash-template" ]; then
+		BASH_TEMPLATE="${HOME}/.local/share/bash-libs/bash-template"
+	else
+		log 0 "Could not locate bash-template"
+		log 0 "Was ${BASENAME} installed correctly?"
+		exit "$EX_FAIL"
+	fi
+
+}
+
+################################################################################
+# ARGS PARSE
+function load_arg {
+	declare -A OPTIONS=(
+		['h']='help'
+		['d']='debug'
+		['v']='verbose'
+		['q']='quiet'
+		['V']='version'
+	)
+	declare -a OPTIONS_NOSHORT=(
+		'no-colors'
+
+		'set-e'
+		'common'
+		'config'
+		'example'
+		'yes'
+		'parseable'
+	)
+
+	IFS=','
+	LONG_OPTIONS="${OPTIONS[*]},${OPTIONS_NOSHORT[*]}"
+	IFS=''
+	SHORT_OPTIONS="${!OPTIONS[*]}"
+	unset IFS
+
+	opt=$(getopt -o "$SHORT_OPTIONS" --long "$LONG_OPTIONS" -- "$@")
+	rc=$?
+	if [ "$rc" -ne 0 ]; then
+		exit "$EX_USAGE"
+	fi
+	eval set -- "$opt"
+	unset opt rc
+	while true; do
+		case "$1" in
+			-h | --help)
+				usage
+				exit 0
+				;;
+			-d | --debug)
+				LOG_LEVEL=3
+				;;
+			-v | --verbose)
+				LOG_LEVEL=$LOG_LEVEL+1
+				;;
+			-q | --quiet)
+				LOG_LEVEL=0
+				;;
+			-V | --version)
+				version
+				exit
+				;;
+			--no-colors)
+				COLORS=false
+				;;
+			--set-e)
+				NO_SETE=false
+				;;
+			--common)
+				NO_COMMON=false
+				;;
+			--config)
+				NO_CONFIG=false
+				;;
+			--example)
+				NO_COMMON=false
+				NO_EXAMPLE=false
+				#NO_PARSEABLE=false
+				NO_YES=false
+				;;
+			--parseable)
+				NO_PARSEABLE=false
+				;;
+			--yes)
+				NO_YES=false
+				;;
+			--)
+				shift
+				break
+				;;
+			*)
+				log 0 "No such parameter: '$1'"
+				exit "$EX_FAIL"
+				;;
+		esac
+		shift
+	done
+	END_LOAD_ARG=("$@")
+}
+
+BASENAME=$(basename "$0")
+if [ -L "${BASH_SOURCE[0]}" ]; then
+	DIRNAME="$(dirname "$(readlink -e "${BASH_SOURCE[0]}")")"
+else
+	DIRNAME="$(dirname "${BASH_SOURCE[0]}")"
+fi
+export COLORS=true
+declare -gi LOG_LEVEL=1
+
+NO_SETE=true
+NO_COMMON=true
+NO_CONFIG=true
+NO_EXAMPLE=true
+NO_PARSEABLE=true
+NO_YES=true
+
+################################################################################
+# Start functions
+if [ "${BASH_SOURCE[0]}" = "${0}" ]; then
+	check_dependency
+	set_colors false
+
+	declare -a END_LOAD_ARG
+	load_arg "$@"
+	eval set --
+	if [ "${#END_LOAD_ARG[@]}" -gt 0 ]; then
+		for arg in "${END_LOAD_ARG[@]}"; do
+			eval set -- "$@" "'$arg'"
+		done
+	fi
+
+	set_colors $COLORS
+
+	if [ $# -eq 0 ]; then
+		log 0 'No target given'
+		usage
+		exit $EX_USAGE
+	fi
+
+	if [ $# -eq 1 ]; then
+		TARGET_TEMPLATE=$1
+		validate_inputs
+		main
+	else
+		log 0 "Too many target given:" "$@"
+		log 0 "see --help"
+		exit "$EX_USAGE"
+	fi
+fi
