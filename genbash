@@ -118,80 +118,12 @@ function main {
 	cp "$BASH_TEMPLATE" "$TARGET_TEMPLATE"
 	chmod +x "$TARGET_TEMPLATE"
 
-	if [ "$NO_SETE" = true ]; then
-		sed -i -re " \
-			/^[[:space:]]*## --set-e start ##/, \
-			/^[[:space:]]*## --set-e end ##/d" \
-			"$TARGET_TEMPLATE"
-	else
-		sed -i -re "/^[[:space:]]*## --set-e start ##/d" \
-			-e "/^[[:space:]]*## --set-e end ##/d" \
-			"$TARGET_TEMPLATE"
-	fi
-
-	if [ "$NO_COMMON" = true ]; then
-		trap 'rm "$TARGET_TEMPLATE"' EXIT
-		log 1 'function log() and set_colors() are required'
-		log 1 'you will have to add them manually'
-		prompt_user_abort 'Do you want to continue?'
-		trap - EXIT
-		sed -i -re " \
-			/^[[:space:]]*## --common start ##/, \
-			/^[[:space:]]*## --common end ##/d" \
-			"$TARGET_TEMPLATE"
-	else
-		sed -i -re "/^[[:space:]]*## --common start ##/d" \
-			-e "/^[[:space:]]*## --common end ##/d" \
-			"$TARGET_TEMPLATE"
-	fi
-
-	if [ "$NO_CONFIG" = true ]; then
-		sed -i -re " \
-			/^[[:space:]]*## --config start ##/, \
-			/^[[:space:]]*## --config end ##/d" \
-			"$TARGET_TEMPLATE"
-	else
-		sed -i -re "/^[[:space:]]*## --config start ##/d" \
-			-e "/^[[:space:]]*## --config end ##/d" \
-			"$TARGET_TEMPLATE"
-	fi
-
-	if [ "$NO_EXAMPLE" = true ]; then
-		sed -i -re " \
-			/^[[:space:]]*## --example start ##/, \
-			/^[[:space:]]*## --example end ##/d" \
-			"$TARGET_TEMPLATE"
-	else
-		sed -i -re "/^[[:space:]]*## --example start ##/d" \
-			-e "/^[[:space:]]*## --example end ##/d" \
-			"$TARGET_TEMPLATE"
-		log 1 "Note that --examples requires the following:"
-		log 1 "  --common"
-		log 1 "  --yes"
-		#log 1 "  --parseable"
-	fi
-
-	if [ "$NO_PARSEABLE" = true ]; then
-		sed -i -re " \
-			/^[[:space:]]*## --parseable start ##/, \
-			/^[[:space:]]*## --parseable end ##/d" \
-			"$TARGET_TEMPLATE"
-	else
-		sed -i -re "/^[[:space:]]*## --parseable start ##/d" \
-			-e "/^[[:space:]]*## --parseable end ##/d" \
-			"$TARGET_TEMPLATE"
-	fi
-
-	if [ "$NO_YES" = true ]; then
-		sed -i -re " \
-			/^[[:space:]]*## --yes start ##/, \
-			/^[[:space:]]*## --yes end ##/d" \
-			"$TARGET_TEMPLATE"
-	else
-		sed -i -re "/^[[:space:]]*## --yes start ##/d" \
-			-e "/^[[:space:]]*## --yes end ##/d" \
-			"$TARGET_TEMPLATE"
-	fi
+	reformat_template 'set-e' "$NO_SETE"
+	reformat_template 'common' "$NO_COMMON"
+	reformat_template 'config' "$NO_CONFIG"
+	reformat_template 'example' "$NO_EXAMPLE"
+	reformat_template 'parseable' "$NO_PARSEABLE"
+	reformat_template 'yes' "$NO_YES"
 
 	sed -i -re "s/CREATED: ---/CREATED: $(date +%F)/" "$TARGET_TEMPLATE"
 
@@ -200,11 +132,32 @@ function main {
 	log chkok "${bldgrn}$TARGET_TEMPLATE${txtrst} created successfully"
 }
 
+function reformat_template {
+	local arg_to_replace=$1
+	local remove=$2
+	if [ "$remove" = true ]; then
+		sed -i -re " \
+			/^[[:space:]]*## --${arg_to_replace} start ##/, \
+			/^[[:space:]]*## --${arg_to_replace} end ##/d" \
+			"$TARGET_TEMPLATE"
+	else
+		sed -i -re "/^[[:space:]]*## --${arg_to_replace} start ##/d" \
+			-e "/^[[:space:]]*## --${arg_to_replace} end ##/d" \
+			"$TARGET_TEMPLATE"
+	fi
+}
 function validate_inputs {
 	log 3 "========== function ${FUNCNAME[0]}"
+
 	if [ -e "$TARGET_TEMPLATE" ]; then
 		log 0 "File '$TARGET_TEMPLATE' already exists"
 		exit "$EX_ERROR"
+	fi
+
+	if [ "$NO_COMMON" = true ]; then
+		log 1 'Function log() and set_colors() are required'
+		log 1 'They will be added inline in your script'
+		prompt_user_abort 'Do you want to continue?'
 	fi
 
 	if ! touch "$TARGET_TEMPLATE" &> /dev/null; then
@@ -214,7 +167,7 @@ function validate_inputs {
 
 	TARGET_TEMPLATE=$(readlink -f "$TARGET_TEMPLATE")
 
-	#Locate bash-template
+	log 3 "Locating bash-template"
 	if [ -e "${DIRNAME}/bash-template" ]; then
 		BASH_TEMPLATE="${DIRNAME}/bash-template"
 	elif [ -e "${HOME}/.local/share/bash-libs/bash-template" ]; then
@@ -295,7 +248,6 @@ function load_arg {
 			--example)
 				NO_COMMON=false
 				NO_EXAMPLE=false
-				#NO_PARSEABLE=false
 				NO_YES=false
 				;;
 			--parseable)
