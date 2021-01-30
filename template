@@ -1,15 +1,12 @@
 #!/bin/bash -
 #===============================================================================
-#
-#         USAGE: ./template --help
-#
 #   DESCRIPTION: ---
 #
 #        AUTHOR: Patrick Brideau
-#       CREATED: 2020-11-24
+#       CREATED: ---
 #      REVISION: ---
 #===============================================================================
-# template - 2020-11-24
+# template: 2021.01.29
 
 set -o nounset   # Treat unset variable as an error
 shopt -s extglob # Extended pattern matching
