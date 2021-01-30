@@ -29,16 +29,17 @@ export EX_USAGE=64 # Command line usage error
 # Dependency
 function check_dependency {
 	local common_path
-	# shellcheck disable=SC1090,SC1091
 	if [ -f "${DIRNAME}/common.sh" ]; then
+		# shellcheck source=./common.sh
 		source "${DIRNAME}/common.sh"
 		common_path="${DIRNAME}/common.sh"
-	elif [ -f "$HOME/scripts/common.sh" ]; then
-		source "$HOME/scripts/common.sh"
-		common_path="$HOME/scripts/common.sh"
+	elif [ -f "$HOME/.local/share/bash-libs/common.sh" ]; then
+		# shellcheck disable=SC1090
+		source "$HOME/.local/share/bash-libs/common.sh"
+		common_path="$HOME/.local/share/bash-libs/common.sh"
 	else
 		echo "Could not find common.sh"
-		echo "Should be in ./ or in ~/scripts"
+		echo "Should be in ./ or in ~/.local"
 		exit "$EX_NOTFOUND"
 	fi
 
@@ -55,6 +56,7 @@ function check_dependency {
 	elif [ "${COMMON_VERSION:8:2}" -lt "${REQUIRED_COMMON_VERSION:8:2}" ]; then
 		echo_required_version
 	fi
+
 	if ! command -v getopt &> /dev/null; then
 		echo "This script require getopt, please install it"
 		exit "$EX_NOTFOUND"
