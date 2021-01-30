@@ -147,6 +147,9 @@ function main {
 	log 1 "This show a warning to stdout"
 	log 0 "This show an error to stderr"
 
+	log chkok "This will show a marked checkbox"
+	log chkerr "This will show an error checkbox"
+
 }
 ## --example start ##
 

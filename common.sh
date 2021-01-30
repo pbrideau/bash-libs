@@ -1,6 +1,6 @@
 #!/bin/bash -
 
-export COMMON_VERSION="2021.01.29"
+export COMMON_VERSION="2021.01.30"
 
 #---  FUNCTION  ----------------------------------------------------------------
 #          NAME:  log
@@ -24,17 +24,19 @@ function log {
 		local chkbox_type=$1
 		shift
 
-		case "$chkbox_type" in
-			chkempty)
-				echo -en "[ ]" "$@"
-				;;
-			chkok)
-				echo -e "${txtcr}${txtrst}[${bldgrn}✔${txtrst}]" "$@"
-				;;
-			chkerr)
-				echo -e "${txtcr}${txtrst}[${bldred}✘${txtrst}]" "$@"
-				;;
-		esac
+		if [ "${LOG_LEVEL:-1}" -ge 1 ]; then
+			case "$chkbox_type" in
+				chkempty)
+					echo -en "[ ]" "$@"
+					;;
+				chkok)
+					echo -e "${txtcr}${txtrst}[${bldgrn}✔${txtrst}]" "$@"
+					;;
+				chkerr)
+					echo -e "${txtcr}${txtrst}[${bldred}✘${txtrst}]" "$@"
+					;;
+			esac
+		fi
 	else
 		if [[ ! "$1" =~ [0-3] ]]; then
 			log 0 "log() argument shoud be [0-3], or (chkempty|chkok|chkerr)"
