@@ -48,7 +48,7 @@ function check_dependency {
 		exit "$EX_NOTFOUND"
 	fi
 
-	function echo_common_version {
+	function echo_required_version {
 		echo "This script require common.sh >= v$REQUIRED_COMMON_VERSION"
 		echo "But v$COMMON_VERSION found"
 		echo "(loaded from $common_path)"
