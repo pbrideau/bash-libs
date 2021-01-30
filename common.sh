@@ -94,7 +94,9 @@ function prompt_user_abort {
 
 	question="${question} [y/N] "
 	if [ "${auto_answer}" = false ]; then
+		trap 'log 0 "Aborting..."' EXIT
 		read -r -p "$question" response
+		trap - EXIT
 		case "$response" in
 			[yY][eE][sS] | [yY]) ;;
 			*)
