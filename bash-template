@@ -6,7 +6,7 @@
 #       CREATED: ---
 #      REVISION: ---
 #===============================================================================
-# template: 2021.01.29
+# template: 2021.01.30
 VERSION="0.0.1"
 ## --common start ##
 REQUIRED_COMMON_VERSION="2021.01.29"
@@ -28,6 +28,7 @@ set -o pipefail # pass the error to the rightmost element when pipe
 # Limit user-defined exit codes to the range 64-113
 # See /usr/include/sysexits.h for common examples
 export EX_USAGE=64 # Command line usage error
+## --common retcode ##
 
 ################################################################################
 # Dependency
@@ -172,6 +173,7 @@ function validate_inputs {
 	log 3 "var_b: $VAR_B"
 	## --example end ##
 }
+## --sigusr start ##
 
 trap sigusr1 SIGUSR1
 function sigusr1 {
@@ -179,6 +181,8 @@ function sigusr1 {
 	echo
 	log 3 "Signal SIGUSR1 received"
 }
+## --sigusr end ##
+## --common insert ##
 
 ################################################################################
 # ARGS PARSE
