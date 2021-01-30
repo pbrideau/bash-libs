@@ -226,7 +226,7 @@ function set_colors {
 	txtund=
 	txtbld=
 	txtrst=
-	txtcr=
+	txtcr="\r"
 	no_colors
 
 	export COLORS_SET=true
