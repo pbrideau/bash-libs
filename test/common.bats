@@ -67,7 +67,7 @@ function Should_Fail_When_LogAnythingElse { #@test
 
 function Should_LogEmptyCheckbox_When_EmptyCheckbox { #@test
 	# When
-	run log_chkbox empty 'Foo bar'
+	run log chkempty 'Foo bar'
 
 	# Then
 	[ "$status" -eq 0 ]
@@ -76,28 +76,20 @@ function Should_LogEmptyCheckbox_When_EmptyCheckbox { #@test
 function Should_LogFailedCheckbox_When_ErrorCheckbox { #@test
 
 	# When
-	run log_chkbox error 'Foo bar'
+	run log chkerr 'Foo bar'
 
 	# Then
 	[ "$status" -eq 0 ]
-	[ "${lines[0]}" = "[✘] Foo bar" ]
+	[ "${lines[0]}" = "$(tput cr)[✘] Foo bar" ]
 }
 function Should_LogSuccessCheckbox_When_OkCheckbox { #@test
 
 	# When
-	run log_chkbox ok 'Foo bar'
+	run log chkok 'Foo bar'
 
 	# Then
 	[ "$status" -eq 0 ]
-	[ "${lines[0]}" = "[✔] Foo bar" ]
-}
-function Should_Fail_When_CheckboxWithoutArg { #@test
-
-	# When
-	run log_chkbox foobar 'FooBar'
-
-	# Then
-	[ "$status" -eq 125 ]
+	[ "${lines[0]}" = "$(tput cr)[✔] Foo bar" ]
 }
 
 function Should_Fail_When_AnswerNoToPromptUserAbort { #@test
