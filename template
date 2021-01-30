@@ -8,16 +8,20 @@
 #===============================================================================
 # template: 2021.01.29
 VERSION="0.0.1"
+## --common start ##
 REQUIRED_COMMON_VERSION="2021.01.29"
+## --common end ##
 
 set -o nounset   # Treat unset variable as an error
 shopt -s extglob # Extended pattern matching
+## --set-e start ##
 
 ################################################################################
 # Why doesn't set -e (or set -o errexit, or trap ERR) do what I expected?
 # http://mywiki.wooledge.org/BashFAQ/105
-#set -e             # Stop execution if there is an error
-#set -o pipefail    # pass the error to the rightmost element when pipe
+set -e          # Stop execution if there is an error
+set -o pipefail # pass the error to the rightmost element when pipe
+## --set-e end ##
 
 ################################################################################
 # Return codes
@@ -28,6 +32,7 @@ export EX_USAGE=64 # Command line usage error
 ################################################################################
 # Dependency
 function check_dependency {
+	## --common start ##
 	local common_path
 	if [ -f "${DIRNAME}/common.sh" ]; then
 		# shellcheck source=./common.sh
@@ -57,6 +62,7 @@ function check_dependency {
 		echo_required_version
 	fi
 
+	## --common end ##
 	if ! command -v getopt &> /dev/null; then
 		echo "This script require getopt, please install it"
 		exit "$EX_NOTFOUND"
@@ -90,8 +96,12 @@ function usage {
 	echo
 	echo "Examples:"
 	echo "  $BASENAME -vv run"
+	## --example start ##
 	echo "  $BASENAME --bar foobar run"
+	## --example end ##
+	## --config start ##
 	echo "  $BASENAME --config /etc/config_file run"
+	## --config end ##
 	echo
 	echo "Options:"
 	echo "   -h, --help                Show this message"
@@ -99,17 +109,25 @@ function usage {
 	echo "   -v, --verbose             Show verbose log (multiple -v is --debug)"
 	echo "   -q, --quiet               Show only error logs (default warn)"
 	echo "   -V, --version             Display script version and exit"
+	## --yes start ##
 	echo "   -y, --yes                 Answer YES to every questions asked"
+	## --yes end ##
+	## --config start ##
 	echo "   -c, --config FILE         Use FILE as config, default:"
 	echo "                               1  ${DIRNAME}/${BASENAME%%.*}.conf"
 	echo "                               2  ~/.${BASENAME%%.*}.conf"
 	echo "                               3  /etc/${BASENAME%%.*}.conf"
+	## --config end ##
 	echo "   --no-colors               Disable colored output"
+	## --parseable start ##
 	echo "   --parseable               Make output easier to parse"
+	## --parseable end ##
 	echo
+	## --example start ##
 	echo "   -f, --foo                 Do foo"
 	echo "   -b, --bar=BAZ             Do bar with BAZ"
 	echo
+	## --example end ##
 	echo "Commands:"
 	echo "   run                       Run the program"
 	echo
@@ -130,6 +148,7 @@ function main {
 	log 0 "This show an error to stderr"
 
 }
+## --example start ##
 
 function slp {
 	sleep 1 &
@@ -141,11 +160,14 @@ function ask_user {
 	prompt_user_abort "Do you want to continue?" "$ALWAYS_YES"
 	log 2 "Finished"
 }
+## --example end ##
 
 function validate_inputs {
 	log 3 "========== function ${FUNCNAME[0]}"
+	## --example start ##
 	log 3 "var_a: $VAR_A"
 	log 3 "var_b: $VAR_B"
+	## --example end ##
 }
 
 trap sigusr1 SIGUSR1
@@ -164,15 +186,23 @@ function load_arg {
 		['v']='verbose'
 		['q']='quiet'
 		['V']='version'
+		## --yes start ##
 		['y']='yes'
+		## --yes end ##
+		## --config start ##
 		['c:']='config:'
+		## --config end ##
+		## --example start ##
 
 		['f']='foo'
 		['b:']='bar:'
+		## --example end ##
 	)
 	declare -a OPTIONS_NOSHORT=(
 		'no-colors'
+		## --parseable start ##
 		'parseable'
+		## --parseable end ##
 	)
 
 	IFS=','
@@ -207,20 +237,27 @@ function load_arg {
 				version
 				exit
 				;;
+			## --yes start ##
 			-y | --yes)
 				ALWAYS_YES=true
 				;;
+			## --yes end ##
 			--no-colors)
 				COLORS=false
 				;;
+			## --parseable start ##
 			--parseable)
 				COLORS=false
 				PARSEABLE=true
 				;;
+			## --parseable end ##
+			## --config start ##
 			-c | --config)
 				shift
 				CONFIG_FILES=("$1")
 				;;
+			## --config end ##
+			## --example start ##
 			-f | --foo)
 				VAR_A='foobar'
 				;;
@@ -228,6 +265,7 @@ function load_arg {
 				shift
 				VAR_B=$1
 				;;
+			## --example end ##
 			--)
 				shift
 				break
@@ -244,18 +282,26 @@ function load_arg {
 
 BASENAME=$(basename "$0")
 DIRNAME="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+## --config start ##
 export CONFIG_FILES=(
 	"${DIRNAME}/${BASENAME%%.*}.conf"
 	"${HOME}/.${BASENAME%%.*}.conf"
 	"/etc/${BASENAME%%.*}.conf"
 )
+## --config end ##
 export COLORS=true
+## --parseable start ##
 export PARSEABLE=false
+## --parseable end ##
+## --yes start ##
 export ALWAYS_YES=false
+## --yes end ##
 declare -gi LOG_LEVEL=1
+## --example start ##
 
 VAR_A='default_value'
 VAR_B='default_value'
+## --example end ##
 
 ################################################################################
 # Start functions
@@ -272,7 +318,9 @@ if [ "${BASH_SOURCE[0]}" = "${0}" ]; then
 		done
 	fi
 
+	## --config start ##
 	load_config "${CONFIG_FILES[@]}"
+	## --config end ##
 	validate_inputs
 
 	set_colors $COLORS
@@ -289,12 +337,14 @@ if [ "${BASH_SOURCE[0]}" = "${0}" ]; then
 			run)
 				main
 				;;
+			## --example start ##
 			sleep)
 				slp
 				;;
 			ask)
 				ask_user
 				;;
+			## --example end ##
 			*)
 				log 0 "No such command: $1"
 				log 0 "See --help for more details"
