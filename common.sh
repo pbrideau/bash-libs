@@ -1,11 +1,16 @@
 #!/bin/bash -
 
+export COMMON_VERSION="2021.01.29"
+
 #---  FUNCTION  ----------------------------------------------------------------
 #          NAME:  log
 #   DESCRIPTION:  Output message to stdout or stderr
 #       GLOBALS:  LOG_LEVEL: Don't display logs above this value.
 #                            Default to 1 if unset
-#    PARAMETERS:  1) int:    Which level of log to display (0-3)
+#    PARAMETERS:  1) string:
+#                            Level of log to display (0-3)
+#                            OR
+#                            Checkbox type to display (chkempty|chkok|chkerr)
 #                 2) string: what to display
 #        OUTPUT:  message to stdout or stderr
 #       RETURNS:
@@ -15,72 +20,52 @@ function log {
 		set_colors false
 	fi
 
-	if [[ ! "$1" =~ [0-3] ]]; then
-		log 0 "Loglevel shoud be [0-3], '$1' given"
-		exit "$EX_FAIL"
-	fi
+	if [[ "$1" =~ (chkempty|chkok|chkerr) ]]; then
+		local chkbox_type=$1
+		shift
 
-	declare -A available_levels=(
-		[0]="error"
-		[1]="warn "
-		[2]="info "
-		[3]="debug"
-	)
-	declare -i level=${1}
-	local color=""
-	shift
-	case $level in
-		0) color="$txtred" ;;
-		1) color="$txtylw" ;;
-		2) color="$txtgrn" ;;
-		3) color="$txtblu" ;;
-	esac
+		case "$chkbox_type" in
+			chkempty)
+				echo -en "[ ]" "$@"
+				;;
+			chkok)
+				echo -e "${txtcr}${txtrst}[${bldgrn}✔${txtrst}]" "$@"
+				;;
+			chkerr)
+				echo -e "${txtcr}${txtrst}[${bldred}✘${txtrst}]" "$@"
+				;;
+		esac
+	else
+		if [[ ! "$1" =~ [0-3] ]]; then
+			log 0 "log() argument shoud be [0-3], or (chkempty|chkok|chkerr)"
+			log 0 "'$1' given"
+			exit "$EX_FAIL"
+		fi
 
-	if [ "${LOG_LEVEL:-1}" -ge "$level" ]; then
-		if [ "$level" -eq 0 ]; then
-			echo -e "${txtrst}[${color}${available_levels[$level]}${txtrst}]" "$@" 1>&2
-		else
-			echo -e "${txtrst}[${color}${available_levels[$level]}${txtrst}]" "$@"
+		declare -A available_levels=(
+			[0]="error"
+			[1]="warn "
+			[2]="info "
+			[3]="debug"
+		)
+		declare -i level=${1}
+		local color=""
+		shift
+		case $level in
+			0) color="$txtred" ;;
+			1) color="$txtylw" ;;
+			2) color="$txtgrn" ;;
+			3) color="$txtblu" ;;
+		esac
+
+		if [ "${LOG_LEVEL:-1}" -ge "$level" ]; then
+			if [ "$level" -eq 0 ]; then
+				echo -e "${txtrst}[${color}${available_levels[$level]}${txtrst}]" "$@" 1>&2
+			else
+				echo -e "${txtrst}[${color}${available_levels[$level]}${txtrst}]" "$@"
+			fi
 		fi
 	fi
-}
-
-#---  FUNCTION  ----------------------------------------------------------------
-#          NAME:  log_chkbox
-#   DESCRIPTION:  Output checkbox message to stdout
-#       GLOBALS:
-#    PARAMETERS:  1) string: What kind of checkbox to display
-#                      empty
-#                      ok
-#                      error
-#                 2) string: Text to display
-#        OUTPUT:  message to stdout
-#       RETURNS:
-#-------------------------------------------------------------------------------
-function log_chkbox {
-	if [ "${COLORS_SET:-unset}" = "unset" ]; then
-		set_colors false
-	fi
-
-	if [[ ! "$1" =~ (empty|ok|error) ]]; then
-		log 0 "Checkbox should be one of 'empty,ok,error'"
-		exit "$EX_FAIL"
-	fi
-
-	local chkbox_type=$1
-	shift
-
-	case "$chkbox_type" in
-		empty)
-			echo -en "[ ]" "$@"
-			;;
-		ok)
-			echo -e "${txtcr}${txtrst}[${bldgrn}✔${txtrst}]" "$@"
-			;;
-		error)
-			echo -e "${txtcr}${txtrst}[${bldred}✘${txtrst}]" "$@"
-			;;
-	esac
 }
 
 #---  FUNCTION  ----------------------------------------------------------------
