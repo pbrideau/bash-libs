@@ -129,6 +129,20 @@ function main {
 
 	sed -i -re "s/CREATED: ---/CREATED: $(date +%F)/" "$TARGET_TEMPLATE"
 
+	if [ "$REMOVE_COMMON" = true ]; then
+		insert_common_functions
+		insert_common_retcode
+	else
+		local ver
+		ver=$(awk -F "=" '/COMMON_VERSION/ {print $2}' "$BASH_COMMON")
+		sed -i -re "s/(REQUIRED_COMMON_VERSION=).*/\1$ver/" "$TARGET_TEMPLATE"
+
+		sed -i -re " \
+			/^[[:space:]]*## --common insert ##/, \
+			/^[[:space:]]*## --common retcode ##/d" \
+			"$TARGET_TEMPLATE"
+	fi
+
 	# shellcheck disable=SC2154
 	# bldgrn and txtrst are defined in common.sh but shellcheck cannot find them
 	log chkok "${bldgrn}$TARGET_TEMPLATE${txtrst} created successfully"
@@ -148,6 +162,55 @@ function reformat_template {
 			"$TARGET_TEMPLATE"
 	fi
 }
+
+function insert_common_retcode {
+	# This will only insert return code <128
+	num_regex='([0-9]|[1-9][0-9]|1[01][0-9]|12[0-7])'
+
+	tmp_file=$(mktemp)
+	trap 'rm $tmp_file' EXIT
+
+	sed -nr "/.*EX_[A-Z]*=${num_regex}[^0-9]+/p" "$BASH_COMMON" > "$tmp_file"
+	sed -i "/## --common retcode ##/ {
+			h
+			r $tmp_file
+			g
+			N
+		}" "$TARGET_TEMPLATE"
+
+	sed -i -re "/^[[:space:]]*## --common retcode ##/d" "$TARGET_TEMPLATE"
+	trap - EXIT
+	rm "$tmp_file"
+}
+
+function insert_common_functions {
+	local ver
+	ver=$(awk -F "=" '/COMMON_VERSION/ {print $2}' "$BASH_COMMON")
+	log 3 "Version of common.sh is $ver"
+
+	log 3 "Inserting log() and set_colors() functions"
+	local tmp_file
+	tmp_file=$(mktemp)
+	trap 'rm $tmp_file' EXIT
+
+	sed -n '/^function log {$/,/^}$/p' "$BASH_COMMON" >> "$tmp_file"
+	sed -n '/^function set_colors {$/,/^}$/p' "$BASH_COMMON" >> "$tmp_file"
+
+	sed -i "/^function log {$/ a #from COMMON_VERSION=$ver" "$tmp_file"
+	sed -i "/^function set_colors {$/ a #from COMMON_VERSION=$ver" "$tmp_file"
+
+	sed -i "/## --common insert ##/ {
+			h
+			r $tmp_file
+			g
+			N
+		}" "$TARGET_TEMPLATE"
+
+	sed -i -re "/^[[:space:]]*## --common insert ##/d" "$TARGET_TEMPLATE"
+	trap - EXIT
+	rm "$tmp_file"
+}
+
 function validate_inputs {
 	log 3 "========== function ${FUNCNAME[0]}"
 
@@ -178,6 +241,23 @@ function validate_inputs {
 		log 0 "Could not locate bash-template"
 		log 0 "Was ${BASENAME} installed correctly?"
 		exit "$EX_FAIL"
+	fi
+
+	log 3 "Locating common.sh"
+	if [ -e "${DIRNAME}/common.sh" ]; then
+		BASH_COMMON="${DIRNAME}/common.sh"
+	elif [ -e "${HOME}/.local/share/bash-libs/common.sh" ]; then
+		BASH_COMMON="${HOME}/.local/share/bash-libs/common.sh"
+	else
+		log 0 "Could not locate common.sh"
+		log 0 "Was ${BASENAME} installed correctly?"
+		exit "$EX_FAIL"
+	fi
+
+	if [ "$REMOVE_EXAMPLE" = false ]; then
+		log 1 "Note that --examples requires the following:"
+		log 1 "  --common"
+		log 1 "  --yes"
 	fi
 
 }
