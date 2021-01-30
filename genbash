@@ -7,7 +7,7 @@
 #      REVISION: ---
 #===============================================================================
 # template: 2021.01.29
-VERSION="0.0.1"
+VERSION="0.0.2"
 REQUIRED_COMMON_VERSION="2021.01.29"
 
 set -o nounset   # Treat unset variable as an error
@@ -101,6 +101,7 @@ function usage {
 	echo "   --yes                     Enable always-yes"
 	echo "   --parseable               Enable parseable"
 	echo "   --set-e                   Enable set -e at the start of the script"
+	echo "   --sigusr                  Enable trap for sigusr"
 	echo
 	echo "Return codes:"
 	echo "  64   EX_USAGE              Command line usage error"
@@ -124,6 +125,7 @@ function main {
 	reformat_template 'example' "$REMOVE_EXAMPLE"
 	reformat_template 'parseable' "$REMOVE_PARSEABLE"
 	reformat_template 'yes' "$REMOVE_YES"
+	reformat_template 'sigusr' "$REMOVE_SIGUSR"
 
 	sed -i -re "s/CREATED: ---/CREATED: $(date +%F)/" "$TARGET_TEMPLATE"
 
@@ -256,6 +258,9 @@ function load_arg {
 			--yes)
 				REMOVE_YES=false
 				;;
+			--sigusr)
+				REMOVE_SIGUSR=false
+				;;
 			--)
 				shift
 				break
@@ -285,6 +290,7 @@ REMOVE_CONFIG=true
 REMOVE_EXAMPLE=true
 REMOVE_PARSEABLE=true
 REMOVE_YES=true
+REMOVE_SIGUSR=true
 
 ################################################################################
 # Start functions
