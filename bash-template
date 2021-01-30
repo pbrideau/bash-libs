@@ -281,7 +281,11 @@ function load_arg {
 }
 
 BASENAME=$(basename "$0")
-DIRNAME="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+if [ -L "${BASH_SOURCE[0]}" ]; then
+	DIRNAME="$(dirname "$(readlink -e "${BASH_SOURCE[0]}")")"
+else
+	DIRNAME="$(dirname "${BASH_SOURCE[0]}")"
+fi
 ## --config start ##
 export CONFIG_FILES=(
 	"${DIRNAME}/${BASENAME%%.*}.conf"
