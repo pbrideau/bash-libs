@@ -46,7 +46,10 @@ function Should_SucceedAndPrintLog0_When_RunQuiet { #@test
 
 	assert_success
 	assert_line '[error] This show an error to stderr'
+	refute_output --partial '[✔] This will show a marked checkbox'
+	refute_output --partial '[✘] This will show an error checkbox'
 }
+
 function Should_SucceedAndPrintLog1_When_Run { #@test
 	run "${cmd[@]}" run
 
