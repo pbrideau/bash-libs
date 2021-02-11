@@ -318,7 +318,11 @@ VAR_B='default_value'
 # Start functions
 if [ "${BASH_SOURCE[0]}" = "${0}" ]; then
 	check_dependency
+	tmp_loglv="$LOG_LEVEL"
+	LOG_LEVEL=0
 	set_colors false
+	LOG_LEVEL="$tmp_loglv"
+	unset tmp_loglv
 
 	declare -a END_LOAD_ARG
 	load_arg "$@"
