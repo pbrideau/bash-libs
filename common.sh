@@ -357,6 +357,61 @@ function dirname {
 	printf '%s\n' "${tmp:-/}"
 }
 
+#---  FUNCTION  ----------------------------------------------------------------
+#          NAME:  format_date
+#   DESCRIPTION:  Return more human readable date ( X seconds ago)
+#       GLOBALS:
+#    PARAMETERS:  1) string: date to parse
+#        OUTPUT:
+#       RETURNS:  string
+#         USAGE:  format_date "DATE"
+#-------------------------------------------------------------------------------
+function format_date {
+	if [ "$#" -ne 1 ]; then
+		log 0 "format_date() require an argument, none given"
+		exit "$EX_FAIL"
+	fi
+
+	if ! date -d "$1" &> /dev/null; then
+		log 0 "format_date() argument shoud be a date, parseable with date"
+		log 0 "'$1' given"
+		exit "$EX_FAIL"
+	fi
+
+	local sec_per_minute sec_per_hour sec_per_day sec_per_month sec_per_year
+
+	sec_per_minute=$((60))
+	sec_per_hour=$((60 * 60))
+	sec_per_day=$((60 * 60 * 24))
+	sec_per_month=$((60 * 60 * 24 * 30))
+	sec_per_year=$((60 * 60 * 24 * 365))
+
+	local last_unix now_unix delta_s
+	last_unix="$(date --date="$1" +%s)" # convert date to unix timestamp
+	now_unix="$(date +'%s')"
+	delta_s=$((now_unix - last_unix))
+
+	if ((delta_s < sec_per_minute * 2)); then
+		echo "$((delta_s)) seconds ago"
+		return
+	elif ((delta_s < sec_per_hour * 2)); then
+		echo "$((delta_s / sec_per_minute)) minutes ago"
+		return
+	elif ((delta_s < sec_per_day * 2)); then
+		echo "$((delta_s / sec_per_hour)) hours ago"
+		return
+	elif ((delta_s < sec_per_month * 2)); then
+		echo "$((delta_s / sec_per_day)) days ago"
+		return
+	elif ((delta_s < sec_per_year * 2)); then
+		echo "$((delta_s / sec_per_month)) months ago"
+		return
+	else
+		echo "$((delta_s / sec_per_year)) years ago"
+		return
+	fi
+}
+
 # Reserved return codes
 # 128+signal (Specific x86)
 # see kill -l or man 7 signal
