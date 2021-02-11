@@ -1,6 +1,6 @@
 #!/bin/bash -
 
-export COMMON_VERSION="2021.01.30"
+export COMMON_VERSION="2021.02.11"
 
 #---  FUNCTION  ----------------------------------------------------------------
 #          NAME:  log
@@ -235,12 +235,14 @@ function set_colors {
 
 	export COLORS_SET=true
 
-	if ! command -v tput &> /dev/null; then
-		log 1 "tput command not found, no colors will be displayed"
-		colors=false
-	elif ! tty -s; then
-		log 1 "Not interractive shell, disabling colors"
-		colors=false
+	if [ "$colors" = true ]; then
+		if ! command -v tput &> /dev/null; then
+			log 1 "tput command not found, no colors will be displayed"
+			colors=false
+		elif ! tty -s; then
+			log 1 "Not interractive shell, disabling colors"
+			colors=false
+		fi
 	fi
 
 	if [ "$colors" = true ]; then
