@@ -139,9 +139,9 @@ function usage {
 function main {
 	log 3 "========== function ${FUNCNAME[0]}"
 
-	log 3 "This show a debug to stdout, when --debug"
-	log 2 "This show an info to stdout, when --verbose"
-	log 1 "This show a warning to stdout"
+	log 3 "This show a debug to stderr, when --debug"
+	log 2 "This show an info to stderr, when --verbose"
+	log 1 "This show a warning to stderr"
 	log 0 "This show an error to stderr"
 
 	log chkok "This will show a marked checkbox"
