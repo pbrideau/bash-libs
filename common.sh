@@ -1,6 +1,6 @@
 #!/bin/bash -
 
-export COMMON_VERSION="2021.02.11"
+export COMMON_VERSION="2021.02.13"
 
 #---  FUNCTION  ----------------------------------------------------------------
 #          NAME:  log
