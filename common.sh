@@ -12,7 +12,7 @@ export COMMON_VERSION="2021.02.11"
 #                            OR
 #                            Checkbox type to display (chkempty|chkok|chkerr)
 #                 2) string: what to display
-#        OUTPUT:  message to stdout or stderr
+#        OUTPUT:  message to stderr
 #       RETURNS:
 #-------------------------------------------------------------------------------
 function log {
@@ -27,19 +27,19 @@ function log {
 		if [ "${LOG_LEVEL:-1}" -ge 1 ]; then
 			case "$chkbox_type" in
 				chkempty)
-					echo -en "[ ]" "$@"
+					echo -en "[ ]" "$@" 1>&2
 					;;
 				chkok)
-					echo -e "${txtcr}${txtrst}[${bldgrn}✔${txtrst}]" "$@"
+					echo -e "${txtcr}${txtrst}[${bldgrn}✔${txtrst}]" "$@" 1>&2
 					;;
 				chkerr)
-					echo -e "${txtcr}${txtrst}[${bldred}✘${txtrst}]" "$@"
+					echo -e "${txtcr}${txtrst}[${bldred}✘${txtrst}]" "$@" 1>&2
 					;;
 			esac
 		fi
 	else
 		if [[ ! "$1" =~ [0-3] ]]; then
-			log 0 "log() argument shoud be [0-3], or (chkempty|chkok|chkerr)"
+			log 0 "log() shoud be [0-3], or (chkempty|chkok|chkerr)"
 			log 0 "'$1' given"
 			exit "$EX_FAIL"
 		fi
@@ -60,12 +60,16 @@ function log {
 			3) color="$txtblu" ;;
 		esac
 
+		local func_depth
+		if [ "$level" -eq 3 ]; then
+			func_depth=$(printf "==%.0s" $(seq 1 $((${#FUNCNAME[@]} - 1))))
+		else
+			func_depth=
+		fi
+
+		local logstr="${txtrst}[${color}${available_levels[$level]}${txtrst}]"
 		if [ "${LOG_LEVEL:-1}" -ge "$level" ]; then
-			if [ "$level" -eq 0 ]; then
-				echo -e "${txtrst}[${color}${available_levels[$level]}${txtrst}]" "$@" 1>&2
-			else
-				echo -e "${txtrst}[${color}${available_levels[$level]}${txtrst}]" "$@"
-			fi
+			echo -e "${txtcr}${logstr}${func_depth}" "$@" 1>&2
 		fi
 	fi
 }
