@@ -325,7 +325,7 @@ if [ "${BASH_SOURCE[0]}" = "${0}" ]; then
 	unset tmp_loglv
 
 	declare -a END_LOAD_ARG
-	load_arg "$@"
+	load_getopt_arg "$@"
 	eval set --
 	if [ "${#END_LOAD_ARG[@]}" -gt 0 ]; then
 		for arg in "${END_LOAD_ARG[@]}"; do
