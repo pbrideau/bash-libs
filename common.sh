@@ -158,7 +158,7 @@ function spinner {
 		sleep 1
 	done
 	if [ "$LOG_LEVEL" -ne 0 ] && [ "${PARSEABLE:-false}" = false ]; then
-		echo -e "${txtcr}[${bldgrn}✔${txtrst}]"
+		log chkok "$process_name Done in $((SECONDS - start_time)) seconds"
 	fi
 }
 
