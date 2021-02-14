@@ -182,7 +182,7 @@ function sigusr1 {
 
 ################################################################################
 # ARGS PARSE
-function load_arg {
+function load_getopt_arg {
 	declare -A OPTIONS=(
 		['h']='help'
 		['d']='debug'
@@ -330,7 +330,7 @@ if [ "${BASH_SOURCE[0]}" = "${0}" ]; then
 	fi
 
 	## --config start ##
-	load_config "${CONFIG_FILES[@]}"
+	load_getopt_config "${CONFIG_FILES[@]}"
 	## --config end ##
 	validate_inputs
 

@@ -85,7 +85,7 @@ function log {
 #       RETURNS:
 #-------------------------------------------------------------------------------
 function prompt_user_abort {
-	log 3 "========== function ${FUNCNAME[0]}"
+	log 3 "${FUNCNAME[0]}()"
 
 	local question="Are you sure?"
 	local auto_answer=false
@@ -126,7 +126,7 @@ function prompt_user_abort {
 #                 spinner $! job_name
 #-------------------------------------------------------------------------------
 function spinner {
-	log 3 "========== function ${FUNCNAME[0]}"
+	log 3 "${FUNCNAME[0]}()"
 	local job=$1
 	local process_name
 	if [ $# -gt 1 ]; then
@@ -277,8 +277,8 @@ function set_colors {
 #        OUTPUT:  Debug or error logs
 #       RETURNS:
 #-------------------------------------------------------------------------------
-function load_config {
-	log 3 "========== function ${FUNCNAME[0]}"
+function load_getopt_config {
+	log 3 "${FUNCNAME[0]}()"
 	declare -a config_files=("$@")
 	declare -i linenum=1
 	for f in "${config_files[@]}"; do
@@ -288,7 +288,7 @@ function load_config {
 				if [[ ! "$line" =~ $regex ]]; then
 					eval set -- "--${line}"
 					log 3 "Loading argument '$*'"
-					load_arg "$@"
+					load_getopt_arg "$@"
 					if [ "${#END_LOAD_ARG[@]}" -gt 0 ]; then
 						log 0 "Could not parse config file ($f) correctly"
 						log 0 "Error on line ${linenum}:"
