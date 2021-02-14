@@ -147,6 +147,10 @@ function main {
 	log chkok "This will show a marked checkbox"
 	log chkerr "This will show an error checkbox"
 
+	## --example start ##
+	echo "var_a: $VAR_A"
+	echo "var_b: $VAR_B"
+	## --example end ##
 }
 ## --example start ##
 
