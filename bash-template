@@ -6,10 +6,10 @@
 #       CREATED: ---
 #      REVISION: ---
 #===============================================================================
-# template: 2021.01.30
+# template: 2021.02.11
 VERSION="0.0.1"
 ## --common start ##
-REQUIRED_COMMON_VERSION="2021.01.29"
+REQUIRED_COMMON_VERSION="2021.02.13"
 ## --common end ##
 
 set -o nounset   # Treat unset variable as an error
