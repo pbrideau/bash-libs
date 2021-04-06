@@ -6,7 +6,7 @@
 #       CREATED: ---
 #      REVISION: ---
 #===============================================================================
-# template: 2021.02.11
+# template: 2021.04.06
 VERSION="0.0.1"
 ## --common start ##
 REQUIRED_COMMON_VERSION="2021.02.13"
@@ -293,6 +293,7 @@ if [ -L "${BASH_SOURCE[0]}" ]; then
 else
 	DIRNAME="$(dirname "${BASH_SOURCE[0]}")"
 fi
+export DIRNAME
 ## --config start ##
 export CONFIG_FILES=(
 	"${DIRNAME}/${BASENAME%%.*}.conf"
