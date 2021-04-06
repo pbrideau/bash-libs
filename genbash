@@ -4,11 +4,11 @@
 #
 #        AUTHOR: Patrick Brideau
 #       CREATED: 2021-01-29
-#      REVISION: ---
+#      REVISION: 0.0.3: Use semver_compare for common version validation
 #===============================================================================
 # template: 2021.01.29
-VERSION="0.0.2"
-REQUIRED_COMMON_VERSION="2021.01.29"
+VERSION="0.0.3"
+REQUIRED_COMMON_VERSION="2021.02.13"
 
 set -o nounset   # Treat unset variable as an error
 shopt -s extglob # Extended pattern matching
@@ -37,18 +37,14 @@ function check_dependency {
 		exit "$EX_NOTFOUND"
 	fi
 
-	function echo_required_version {
+	local compare
+	compare=$(semver_compare "$COMMON_VERSION" "$REQUIRED_COMMON_VERSION")
+
+	if [ "$compare" -eq -1 ]; then
 		echo "This script require common.sh >= v$REQUIRED_COMMON_VERSION"
 		echo "But v$COMMON_VERSION found"
 		echo "(loaded from $common_path)"
 		exit "$EX_FAIL"
-	}
-	if [ "${COMMON_VERSION:0:4}" -lt "${REQUIRED_COMMON_VERSION:0:4}" ]; then
-		echo_required_version
-	elif [ "${COMMON_VERSION:5:2}" -lt "${REQUIRED_COMMON_VERSION:5:2}" ]; then
-		echo_required_version
-	elif [ "${COMMON_VERSION:8:2}" -lt "${REQUIRED_COMMON_VERSION:8:2}" ]; then
-		echo_required_version
 	fi
 
 	if ! command -v getopt &> /dev/null; then
