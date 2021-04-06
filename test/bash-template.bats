@@ -12,7 +12,8 @@ function Should_FailAndPrintUsageInColor_When_NoCommand { #@test
 	run "$cmd_hard_to_parse"
 
 	assert_failure 64
-	assert_line "$(tput cr)$(tput sgr0)[$(tput setaf 1)error$(tput sgr0)] No command given"
+	colored_tag="$(tput cr)$(tput sgr0)[$(tput setaf 1)error$(tput sgr0)]"
+	assert_line "${colored_tag} No command given"
 	assert_line --partial 'Usage:'
 }
 function Should_SucceedAndPrintUsage_When_HelpArgument { #@test
@@ -35,10 +36,10 @@ function Should_Fail_When_BadCommand { #@test
 	assert_line "$(tput cr)[error] No such command: BadCommand"
 }
 function Should_Fail_when_TooManyCommands { #@test
-	run "${cmd[@]}" Many Commands
+	run "${cmd[@]}" Foo Bar
 
 	assert_failure 64
-	assert_line --index 0 "$(tput cr)[error] Too many commands given: Many Commands"
+	assert_line --index 0 "$(tput cr)[error] Too many commands given: Foo Bar"
 }
 
 function Should_SucceedAndPrintLog0_When_RunQuiet { #@test
