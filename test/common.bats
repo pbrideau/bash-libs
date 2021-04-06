@@ -18,11 +18,11 @@ function Should_LogErrorToStderr_When_Log0 { #@test
 
 	# Then
 	[ "$status" -eq 0 ]
-	[ "${lines[0]}" = "[error] Error" ]
+	[ "${lines[0]}" = "$(tput cr)[error] Error" ]
 	# No way to check if it's stdout or stderr with bats...
 	# Assume it's in stderr
 }
-function Should_LogWarningToStdout_When_Log1 { #@test
+function Should_LogWarningToStderr_When_Log1 { #@test
 	# Given
 	export LOG_LEVEL=1
 
@@ -31,9 +31,9 @@ function Should_LogWarningToStdout_When_Log1 { #@test
 
 	# Then
 	[ "$status" -eq 0 ]
-	[ "${lines[0]}" = "[warn ] Warning" ]
+	[ "${lines[0]}" = "$(tput cr)[warn ] Warning" ]
 }
-function Should_LogInfoToStdout_When_Log2 { #@test
+function Should_LogInfoToStderr_When_Log2 { #@test
 	# Given
 	export LOG_LEVEL=2
 
@@ -42,9 +42,9 @@ function Should_LogInfoToStdout_When_Log2 { #@test
 
 	# Then
 	[ "$status" -eq 0 ]
-	[ "${lines[0]}" = "[info ] Info" ]
+	[ "${lines[0]}" = "$(tput cr)[info ] Info" ]
 }
-function Should_LogDebugToStdout_When_Log3 { #@test
+function Should_LogDebugToStderr_When_Log3 { #@test
 	# Given
 	export LOG_LEVEL=3
 
@@ -53,7 +53,9 @@ function Should_LogDebugToStdout_When_Log3 { #@test
 
 	# Then
 	[ "$status" -eq 0 ]
-	[ "${lines[0]}" = "[debug] Debug" ]
+	[ "${lines[0]}" = "$(tput cr)[debug]======== Debug" ]
+	# Note this debug run 4 funtions deep within the bats stack
+	# This is why there is this much '=='
 }
 function Should_Fail_When_LogAnythingElse { #@test
 	# Given
