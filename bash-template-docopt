@@ -136,10 +136,10 @@ function main {
 	log 3 "This show a debug to stderr, when --debug"
 	log 2 "This show an info to stderr, when --verbose"
 	log 1 "This show a warning to stderr"
-	log 0 "This show an error to stderr (you should usually exit after this log"
+	log 0 "This show an error to stderr"
 
-	log chkok "This will show a marked checkbox to stderr"
-	log chkerr "This will show an error checkbox to stderr"
+	log chkok "This will show a marked checkbox"
+	log chkerr "This will show an error checkbox"
 	## --example start ##
 
 	# shellcheck disable=SC2154 # ARGV_* are defined by docopts
@@ -185,7 +185,7 @@ function sigusr1 {
 ## --sigusr end ##
 ## --common insert ##
 
-function load_arg {
+function load_docopts_arg {
 
 	help=$(grep "^##?" "$0" | cut -c 5- | sed -e "s/\${BASENAME}/$BASENAME/g")
 	version=$(grep "^#?" "$0" | cut -c 4- | sed -e "1i$BASENAME $VERSION")
@@ -228,7 +228,7 @@ if [ "${BASH_SOURCE[0]}" = "${0}" ]; then
 	LOG_LEVEL="$tmp_loglv"
 	unset tmp_loglv
 
-	load_arg "$@"
+	load_docopts_arg "$@"
 
 	# shellcheck disable=2154 # ARGV_* are defined by docopts
 	load_config "$ARGV_config"
