@@ -137,7 +137,7 @@ function usage {
 ################################################################################
 # MAIN
 function main {
-	log 3 "========== function ${FUNCNAME[0]}"
+	log 3 "${FUNCNAME[0]}()"
 
 	log 3 "This show a debug to stderr, when --debug"
 	log 2 "This show an info to stderr, when --verbose"
@@ -155,19 +155,21 @@ function main {
 ## --example start ##
 
 function slp {
+	log 3 "${FUNCNAME[0]}()"
 	sleep 1 &
 	spinner $! sleeping
 	log 2 'Finished'
 }
 
 function ask_user {
+	log 3 "${FUNCNAME[0]}()"
 	prompt_user_abort "Do you want to continue?" "$ALWAYS_YES"
 	log 2 "Finished"
 }
 ## --example end ##
 
 function validate_inputs {
-	log 3 "========== function ${FUNCNAME[0]}"
+	log 3 "${FUNCNAME[0]}()"
 	## --example start ##
 	log 3 "var_a: $VAR_A"
 	log 3 "var_b: $VAR_B"
@@ -337,6 +339,7 @@ if [ "${BASH_SOURCE[0]}" = "${0}" ]; then
 	## --config start ##
 	load_getopt_config "${CONFIG_FILES[@]}"
 	## --config end ##
+	log 3 "pid: $$"
 	validate_inputs
 
 	set_colors $COLORS
@@ -348,7 +351,6 @@ if [ "${BASH_SOURCE[0]}" = "${0}" ]; then
 	fi
 
 	if [ $# -eq 1 ]; then
-		log 3 "pid: $$"
 		case "$1" in
 			run)
 				main
