@@ -1,6 +1,6 @@
 #!/bin/bash -
 
-export COMMON_VERSION="2021.02.13"
+export COMMON_VERSION="2021.04.14"
 
 #---  FUNCTION  ----------------------------------------------------------------
 #          NAME:  log
@@ -139,12 +139,12 @@ function spinner {
 	local temp
 
 	log 3 "background job pid: $job"
-	if [ "${PARSEABLE:-false}" = true ]; then
+	if [ "${PARSEABLE:-true}" = true ]; then
 		log 1 "running: $process_name"
 	fi
 	while ps -q "$job" &> /dev/null; do
 		if [ "$LOG_LEVEL" -ne 0 ]; then
-			if [ "${PARSEABLE:-false}" = true ]; then
+			if [ "${PARSEABLE:-true}" = true ]; then
 				echo -n '.'
 			else
 				temp="${spinstr#?}"
@@ -157,7 +157,7 @@ function spinner {
 		fi
 		sleep 1
 	done
-	if [ "$LOG_LEVEL" -ne 0 ] && [ "${PARSEABLE:-false}" = false ]; then
+	if [ "$LOG_LEVEL" -ne 0 ] && [ "${PARSEABLE:-true}" = false ]; then
 		log chkok "$process_name Done in $((SECONDS - start_time)) seconds"
 	fi
 }
