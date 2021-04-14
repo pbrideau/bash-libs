@@ -1,0 +1,255 @@
+#!/bin/bash -
+#===============================================================================
+#   DESCRIPTION: ---
+#
+#        AUTHOR: Patrick Brideau
+#       CREATED: ---
+#      REVISION: ---
+#===============================================================================
+# docopts template: 2021.02.13
+VERSION="0.0.1"
+## --common start ##
+REQUIRED_COMMON_VERSION="2021.02.13"
+## --common end ##
+
+set -o nounset   # Treat unset variable as an error
+shopt -s extglob # Extended pattern matching
+## --set-e start ##
+
+################################################################################
+# Why doesn't set -e (or set -o errexit, or trap ERR) do what I expected?
+# http://mywiki.wooledge.org/BashFAQ/105
+set -e          # Stop execution if there is an error
+set -o pipefail # pass the error to the rightmost element when pipe
+## --set-e end ##
+
+################################################################################
+# Return codes
+# Limit user-defined exit codes to the range 64-113
+# See /usr/include/sysexits.h for common examples
+export EX_USAGE=64 # Command line usage error
+## --common retcode ##
+
+################################################################################
+# Dependency
+function check_dependency {
+	## --common start ##
+	local common_path
+	if [ -f "${DIRNAME}/common.sh" ]; then
+		# shellcheck source=./common.sh
+		source "${DIRNAME}/common.sh"
+		common_path="${DIRNAME}/common.sh"
+	elif [ -f "$HOME/.local/share/bash-libs/common.sh" ]; then
+		# shellcheck disable=SC1090
+		source "$HOME/.local/share/bash-libs/common.sh"
+		common_path="$HOME/.local/share/bash-libs/common.sh"
+	else
+		echo "Could not find common.sh"
+		echo "Should be in ./ or in ~/.local"
+		exit "$EX_NOTFOUND"
+	fi
+
+	local compare
+	compare=$(semver_compare "$COMMON_VERSION" "$REQUIRED_COMMON_VERSION")
+
+	if [ "$compare" -eq -1 ]; then
+		echo "This script require common.sh >= v$REQUIRED_COMMON_VERSION"
+		echo "But v$COMMON_VERSION found"
+		echo "(loaded from $common_path)"
+		exit "$EX_FAIL"
+	fi
+
+	## --common end ##
+	if ! command -v docopts &> /dev/null; then
+		echo "This script require docopts, please install it to your PATH"
+		echo "see https://github.com/docopt/docopts"
+		echo " or directly:"
+		local url="https://github.com/docopt/docopts/releases/download/v0.6.3-rc2/"
+		url+="docopts_linux_amd64"
+		echo "wget $url -O $HOME/.local/bin/docopts"
+		exit "$EX_NOTFOUND"
+	fi
+}
+
+#? Copyright (C) 2020-2021 Patrick Brideau
+#?
+#? This program is free software: you can redistribute it and/or modify
+#? it under the terms of the GNU General Public License as published by
+#? the Free Software Foundation, either version 3 of the License, or
+#? (at your option) any later version.
+#?
+#? This program is distributed in the hope that it will be useful,
+#? but WITHOUT ANY WARRANTY; without even the implied warranty of
+#? MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#? GNU General Public License for more details.
+#?
+#? You should have received a copy of the GNU General Public License
+#? along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+##? Usage:
+##?   ${BASENAME} [COMMAND] [options] [-q|-v...|-d]
+## --example start ##
+##?   ${BASENAME} [COMMAND] [options] [-q|-v...|-d] [--foo] [--bar=FOOBAR]
+## --example end ##
+##?   ${BASENAME} (--help | --version)
+##?
+##? Options:
+##?    -h, --help                Show this message
+##?    -d, --debug               Show debug log
+##?    -v, --verbose             Show verbose log (multiple -v is --debug)
+##?    -q, --quiet               Show only error logs (default warn)
+##?    -V, --version             Display script version and exit
+##?    --no-colors               Disable colored output
+## --yes start ##
+##?    -y, --yes                 Answer YES to every questions asked
+## --yes end ##
+## --config start ##
+##?    -c, --config=FILE         Load config from file
+##?                              [default: /etc/${BASENAME}.conf]
+## --config end ##
+## --parseable start ##
+##?    --parseable               Make output easier to parse
+## --parseable end ##
+## --example start ##
+##?    -f, --foo                 Do foo
+##?    -b, --bar=BAZ             Do bar with BAZ [default: foobar]
+##?
+## --example end ##
+##?
+##? Commands:
+##?    run                       Run the program (default)
+
+################################################################################
+# MAIN
+function main {
+	log 3 "${FUNCNAME[0]}()"
+
+	log 3 "This show a debug to stderr, when --debug"
+	log 2 "This show an info to stderr, when --verbose"
+	log 1 "This show a warning to stderr"
+	log 0 "This show an error to stderr (you should usually exit after this log"
+
+	log chkok "This will show a marked checkbox to stderr"
+	log chkerr "This will show an error checkbox to stderr"
+	## --example start ##
+
+	# shellcheck disable=SC2154 # ARGV_* are defined by docopts
+	echo "foo: $ARGV_foo"
+	# shellcheck disable=SC2154 # ARGV_* are defined by docopts
+	echo "bar: $ARGV_bar"
+	## --example end ##
+}
+## --example start ##
+
+function slp {
+	log 3 "${FUNCNAME[0]}()"
+	sleep 1 &
+	spinner $! sleeping
+	log 2 'Finished'
+}
+
+function ask_user {
+	log 3 "${FUNCNAME[0]}()"
+	# shellcheck disable=SC2154 # ARGV_* are defined by docopts
+	prompt_user_abort "Do you want to continue?" "$ARGV_yes"
+	log 2 "Finished"
+}
+## --example end ##
+
+function validate_inputs {
+	log 3 "${FUNCNAME[0]}()"
+	## --example start ##
+	# shellcheck disable=2154 # ARGV_* are defined by docopts
+	log 3 "foo: $ARGV_foo"
+	# shellcheck disable=2154 # ARGV_* are defined by docopts
+	log 3 "bar: $ARGV_bar"
+	## --example end ##
+}
+## --sigusr start ##
+
+trap sigusr1 SIGUSR1
+function sigusr1 {
+	# Trigger this with kill -s USR1 <pid>
+	echo
+	log 3 "Signal SIGUSR1 received"
+}
+## --sigusr end ##
+## --common insert ##
+
+function load_arg {
+
+	help=$(grep "^##?" "$0" | cut -c 5- | sed -e "s/\${BASENAME}/$BASENAME/g")
+	version=$(grep "^#?" "$0" | cut -c 4- | sed -e "1i$BASENAME $VERSION")
+	eval "$(docopts -G ARGV -h "$help" -V "$version" : "$@")"
+
+	# shellcheck disable=SC2154 # ARGV_* are defined by docopts
+	if [[ "$ARGV_verbose" =~ [0-9]+ ]] && [ "$ARGV_verbose" -gt 1 ]; then
+		LOG_LEVEL=3
+	elif [ "$ARGV_debug" = true ]; then
+		LOG_LEVEL=3
+	elif [[ "$ARGV_verbose" =~ [0-9]+ ]] && [ "$ARGV_verbose" -eq 1 ]; then
+		LOG_LEVEL=2
+	elif [ "$ARGV_quiet" = true ]; then
+		LOG_LEVEL=0
+	fi
+
+	# shellcheck disable=SC2154 # ARGV_* are declared by docopts
+	if [ "$ARGV_no_colors" = true ]; then
+		set_colors "false"
+	else
+		set_colors "true"
+	fi
+}
+
+BASENAME=$(basename "$0")
+if [ -L "${BASH_SOURCE[0]}" ]; then
+	DIRNAME="$(dirname "$(readlink -e "${BASH_SOURCE[0]}")")"
+else
+	DIRNAME="$(dirname "${BASH_SOURCE[0]}")"
+fi
+declare -gi LOG_LEVEL=1
+
+################################################################################
+# Start functions
+if [ "${BASH_SOURCE[0]}" = "${0}" ]; then
+	check_dependency
+	tmp_loglv="$LOG_LEVEL"
+	LOG_LEVEL=0
+	set_colors false
+	LOG_LEVEL="$tmp_loglv"
+	unset tmp_loglv
+
+	load_arg "$@"
+
+	# shellcheck disable=2154 # ARGV_* are defined by docopts
+	load_config "$ARGV_config"
+
+	log 3 "pid: $$"
+	validate_inputs
+
+	log 3 "ARGV"
+	set -o posix
+	for arg in $(set | grep '^ARGV'); do
+		log 3 "$arg"
+	done
+	set +o posix
+
+	case "$ARGV_COMMAND" in
+		'' | run)
+			main
+			;;
+		## --example start ##
+		sleep)
+			slp
+			;;
+		ask)
+			ask_user
+			;;
+		## --example end ##
+		*)
+			log 0 "No such command: $ARGV_COMMAND"
+			log 0 "See --help for more details"
+			exit "$EX_USAGE"
+			;;
+	esac
+fi
