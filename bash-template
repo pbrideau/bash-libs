@@ -6,10 +6,10 @@
 #       CREATED: ---
 #      REVISION: ---
 #===============================================================================
-# template: 2021.04.06
+# template: 2021.04.14
 VERSION="0.0.1"
 ## --common start ##
-REQUIRED_COMMON_VERSION="2021.02.13"
+REQUIRED_COMMON_VERSION="" #should be populated by genbash during generation
 ## --common end ##
 
 set -o nounset   # Treat unset variable as an error
@@ -70,6 +70,10 @@ function check_dependency {
 # VERSION
 function version {
 	echo "$BASENAME, version $VERSION"
+	## --common start ##
+	echo "common.sh, version $COMMON_VERSION"
+	## --common end ##
+	echo
 	echo "Copyright (C) 2020-2021 Patrick Brideau"
 	echo
 	echo "This program is free software: you can redistribute it and/or modify"

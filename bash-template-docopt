@@ -6,10 +6,10 @@
 #       CREATED: ---
 #      REVISION: ---
 #===============================================================================
-# docopts template: 2021.02.13
+# docopts template: 2021.04.14
 VERSION="0.0.1"
 ## --common start ##
-REQUIRED_COMMON_VERSION="2021.02.13"
+REQUIRED_COMMON_VERSION="" #should be populated by genbash during generation
 ## --common end ##
 
 set -o nounset   # Treat unset variable as an error
@@ -183,7 +183,11 @@ function sigusr1 {
 function load_docopts_arg {
 
 	help=$(grep "^##?" "$0" | cut -c 5- | sed -e "s/\${BASENAME}/$BASENAME/g")
-	version=$(grep "^#?" "$0" | cut -c 4- | sed -e "1i$BASENAME $VERSION")
+	local version_str="${BASENAME}, version ${VERSION}\n"
+	## --common start ##
+	version_str+="common.sh, version ${COMMON_VERSION}\n"
+	## --common end ##
+	version=$(grep "^#?" "$0" | cut -c 4- | sed -e "1i${version_str}")
 	eval "$(docopts -G ARGV -h "$help" -V "$version" : "$@")"
 
 	if [ "${ARGV_verbose:?}" -gt 1 ] || [ "${ARGV_debug:?}" = true ]; then
