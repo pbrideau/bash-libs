@@ -199,6 +199,14 @@ function load_docopts_arg {
 	else
 		set_colors "true"
 	fi
+
+	## --parseable start ##
+	if [ "${ARGV_parseable:?}" = true ]; then
+		export PARSEABLE=true
+	else
+		export PARSEABLE=false
+	fi
+	## --parseable end ##
 }
 
 BASENAME=$(basename "$0")
