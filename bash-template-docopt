@@ -91,9 +91,12 @@ function check_dependency {
 ################################################################################
 # USAGE
 ##? Usage:
-##?   ${BASENAME} [COMMAND] [options] [-q|-v...|-d]
+##?   ${BASENAME} [options] [-q|-v...|-d] [COMMAND]
+##?   ${BASENAME} [options] [-q|-v...|-d] [run]
 ## --example start ##
-##?   ${BASENAME} [COMMAND] [options] [-q|-v...|-d] [--foo] [--bar=FOOBAR]
+##?   ${BASENAME} [options] [-q|-v...|-d] run [--foo] [--bar=FOOBAR]
+##?   ${BASENAME} [options] [-q|-v...|-d] sleep [--parseable]
+##?   ${BASENAME} [options] [-q|-v...|-d] ask [--yes]
 ## --example end ##
 ##?   ${BASENAME} (--help | --version)
 ##?
