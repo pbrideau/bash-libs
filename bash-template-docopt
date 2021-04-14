@@ -122,6 +122,11 @@ function check_dependency {
 ##?
 ##? Commands:
 ##?    run                       Run the program (default)
+##?
+##? Return codes:
+##?    64   EX_USAGE              Command line usage error"
+##?    125  EX_FAIL               Command itself fail"
+##?    127  EX_NOTFOUND           File not found"
 
 ################################################################################
 # MAIN
