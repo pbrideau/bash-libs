@@ -221,9 +221,10 @@ if [ "${BASH_SOURCE[0]}" = "${0}" ]; then
 
 	load_docopts_arg "$@"
 
-	# shellcheck disable=2154 # ARGV_* are defined by docopts
-	load_config "$ARGV_config"
-
+	## --config start ##
+	log 1 "--config does not work in this docopts template. Please fix."
+	#load_getopt_config "${ARGV_config:?}
+	## --config end ##
 	log 3 "pid: $$"
 	validate_inputs
 
