@@ -93,6 +93,8 @@ function usage {
 	echo "   -V, --version             Display script version and exit"
 	echo "   --no-colors               Disable colored output"
 	echo
+	echo "   --docopt                  Use the docopt template (default getopt)"
+	echo
 	echo "Template options:"
 	echo "   --common                  Enable source of common.sh"
 	echo "   --example                 Enable examples"
@@ -115,7 +117,7 @@ function main {
 
 	log 2 "Generating bash script : $TARGET_TEMPLATE"
 
-	cp "$BASH_TEMPLATE" "$TARGET_TEMPLATE"
+	cp "$BASH_TEMPLATE_PATH" "$TARGET_TEMPLATE"
 	chmod +x "$TARGET_TEMPLATE"
 
 	reformat_template 'set-e' "$REMOVE_SETE"
@@ -241,15 +243,31 @@ function validate_inputs {
 	TARGET_TEMPLATE=$(readlink -f "$TARGET_TEMPLATE")
 
 	log 3 "Locating bash-template"
-	if [ -e "${DIRNAME}/bash-template" ]; then
-		BASH_TEMPLATE="${DIRNAME}/bash-template"
-	elif [ -e "${HOME}/.local/share/bash-libs/bash-template" ]; then
-		BASH_TEMPLATE="${HOME}/.local/share/bash-libs/bash-template"
-	else
-		log 0 "Could not locate bash-template"
-		log 0 "Was ${BASENAME} installed correctly?"
-		exit "$EX_FAIL"
-	fi
+	case "$BASH_TEMPLATE" in
+		getopt)
+			if [ -e "${DIRNAME}/bash-template" ]; then
+				BASH_TEMPLATE_PATH="${DIRNAME}/bash-template"
+			elif [ -e "${HOME}/.local/share/bash-libs/bash-template" ]; then
+				BASH_TEMPLATE_PATH="${HOME}/.local/share/bash-libs/bash-template"
+			else
+				log 0 "Could not locate bash-template"
+				log 0 "Was ${BASENAME} installed correctly?"
+				exit "$EX_FAIL"
+			fi
+			;;
+		docopt)
+			if [ -e "${DIRNAME}/bash-template-docopt" ]; then
+				BASH_TEMPLATE_PATH="${DIRNAME}/bash-template-docopt"
+			elif [ -e "${HOME}/.local/share/bash-libs/bash-template-docopt" ]; then
+				BASH_TEMPLATE_PATH="${HOME}/.local/share/bash-libs/bash-template-docopt"
+			else
+				log 0 "Could not locate bash-template-docopts"
+				log 0 "Was ${BASENAME} installed correctly?"
+				exit "$EX_FAIL"
+			fi
+			;;
+
+	esac
 
 	log 3 "Locating common.sh"
 	if [ -e "${DIRNAME}/common.sh" ]; then
@@ -281,6 +299,8 @@ function load_arg {
 	)
 	declare -a OPTIONS_NOSHORT=(
 		'no-colors'
+
+		'docopt'
 
 		'set-e'
 		'common'
@@ -324,6 +344,9 @@ function load_arg {
 				;;
 			--no-colors)
 				COLORS=false
+				;;
+			--docopt)
+				BASH_TEMPLATE="docopt"
 				;;
 			--set-e)
 				REMOVE_SETE=false
@@ -371,6 +394,7 @@ fi
 export COLORS=true
 declare -gi LOG_LEVEL=1
 GENBASH_CONFIG="$HOME/.genbashrc"
+BASH_TEMPLATE="getopt"
 
 if [ -e "$GENBASH_CONFIG" ]; then
 	# shellcheck disable=SC1090

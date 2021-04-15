@@ -2,4 +2,5 @@
 
 install -vD common.sh "${HOME}/.local/share/bash-libs/common.sh"
 install -vD bash-template "${HOME}/.local/share/bash-libs/bash-template"
+install -vD bash-template-docopt "${HOME}/.local/share/bash-libs/bash-template-docopt"
 install -vD genbash "${HOME}/.local/bin/genbash"
