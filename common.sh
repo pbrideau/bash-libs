@@ -21,7 +21,7 @@ export COMMON_VERSION="2021.04.15"
 
 #---  FUNCTION  ----------------------------------------------------------------
 #          NAME:  log
-#   DESCRIPTION:  Output message to stdout or stderr
+#   DESCRIPTION:  Output message to stderr
 #       GLOBALS:  LOG_LEVEL: Don't display logs above this value.
 #                            Default to 1 if unset
 #    PARAMETERS:  1) string:
