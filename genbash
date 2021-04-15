@@ -5,9 +5,10 @@
 #        AUTHOR: Patrick Brideau
 #       CREATED: 2021-01-29
 #      REVISION: 0.0.3: Use semver_compare for common version validation
+#                0.1.0: Add ~/.genbashrc config for author
 #===============================================================================
 # template: 2021.01.29
-VERSION="0.0.3"
+VERSION="0.1.0"
 REQUIRED_COMMON_VERSION="2021.02.13"
 
 set -o nounset   # Treat unset variable as an error
@@ -127,6 +128,10 @@ function main {
 
 	sed -i -re "s/CREATED: ---/CREATED: $(date +%F)/" "$TARGET_TEMPLATE"
 
+	if [ -n "${AUTHOR:-}" ]; then
+		sed -i -re "s/AUTHOR: ---/AUTHOR: $AUTHOR/" "$TARGET_TEMPLATE"
+	fi
+
 	if [ "$REMOVE_COMMON" = true ]; then
 		insert_common_functions
 		insert_common_retcode
@@ -222,6 +227,12 @@ function validate_inputs {
 		prompt_user_abort 'Do you want to continue?'
 	fi
 
+	if [ -z "${AUTHOR:-}" ]; then
+		log 1 "No author configured"
+		log 1 "You can add 'AUTHOR=\"Foo Bar\"' in $GENBASH_CONFIG"
+		prompt_user_abort "Do you want to continue?"
+	fi
+
 	if ! touch "$TARGET_TEMPLATE" &> /dev/null; then
 		log 0 "Cannot write to '$TARGET_TEMPLATE'"
 		exit "$EX_ERROR"
@@ -256,7 +267,6 @@ function validate_inputs {
 		log 1 "  --common"
 		log 1 "  --yes"
 	fi
-
 }
 
 ################################################################################
@@ -360,6 +370,12 @@ else
 fi
 export COLORS=true
 declare -gi LOG_LEVEL=1
+GENBASH_CONFIG="$HOME/.genbashrc"
+
+if [ -e "$GENBASH_CONFIG" ]; then
+	# shellcheck disable=SC1090
+	source "$GENBASH_CONFIG"
+fi
 
 REMOVE_SETE=true
 REMOVE_COMMON=true

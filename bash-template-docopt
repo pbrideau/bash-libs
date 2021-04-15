@@ -2,11 +2,11 @@
 #===============================================================================
 #   DESCRIPTION: ---
 #
-#        AUTHOR: Patrick Brideau
+#        AUTHOR: ---
 #       CREATED: ---
 #      REVISION: ---
 #===============================================================================
-# docopts template: 2021.04.14
+# docopts template: 2021.04.15
 VERSION="0.0.1"
 ## --common start ##
 REQUIRED_COMMON_VERSION="" #should be populated by genbash during generation
