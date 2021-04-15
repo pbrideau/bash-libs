@@ -457,6 +457,7 @@ function format_date {
 			return
 		fi
 	else
+		delta_s=$((-delta_s))
 		if ((delta_s > sec_per_year * 2)); then
 			echo "in $((delta_s / sec_per_year)) years"
 			return
