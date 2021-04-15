@@ -51,13 +51,7 @@ function log {
 					;;
 			esac
 		fi
-	else
-		if [[ ! "$1" =~ [0-3] ]]; then
-			log 0 "log() shoud be [0-3], or (chkempty|chkok|chkerr)"
-			log 0 "'$1' given"
-			exit "$EX_FAIL"
-		fi
-
+	elif [[ "$1" =~ [0-3] ]]; then
 		declare -A available_levels=(
 			[0]="error"
 			[1]="warn "
@@ -85,6 +79,10 @@ function log {
 		if [ "${LOG_LEVEL:-1}" -ge "$level" ]; then
 			echo -e "${txtcr}${logstr}${func_depth}" "$@" 1>&2
 		fi
+	else
+		log 0 "log() shoud be [0-3], or (chkempty|chkok|chkerr)"
+		log 0 "'$1' given"
+		exit "$EX_FAIL"
 	fi
 }
 
