@@ -14,7 +14,10 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-export COMMON_VERSION="2021.04.14"
+# You can get the lastest version here:
+# https://github.com/pbrideau/bash-libs
+
+export COMMON_VERSION="2021.04.15"
 
 #---  FUNCTION  ----------------------------------------------------------------
 #          NAME:  log
