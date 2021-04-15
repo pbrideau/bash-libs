@@ -410,24 +410,45 @@ function format_date {
 	now_unix="$(date +'%s')"
 	delta_s=$((now_unix - last_unix))
 
-	if ((delta_s < sec_per_minute * 2)); then
-		echo "$((delta_s)) seconds ago"
-		return
-	elif ((delta_s < sec_per_hour * 2)); then
-		echo "$((delta_s / sec_per_minute)) minutes ago"
-		return
-	elif ((delta_s < sec_per_day * 2)); then
-		echo "$((delta_s / sec_per_hour)) hours ago"
-		return
-	elif ((delta_s < sec_per_month * 2)); then
-		echo "$((delta_s / sec_per_day)) days ago"
-		return
-	elif ((delta_s < sec_per_year * 2)); then
-		echo "$((delta_s / sec_per_month)) months ago"
-		return
+	if [ "$delta_s" -gt 0 ]; then
+		if ((delta_s < sec_per_minute * 2)); then
+			echo "$((delta_s)) seconds ago"
+			return
+		elif ((delta_s < sec_per_hour * 2)); then
+			echo "$((delta_s / sec_per_minute)) minutes ago"
+			return
+		elif ((delta_s < sec_per_day * 2)); then
+			echo "$((delta_s / sec_per_hour)) hours ago"
+			return
+		elif ((delta_s < sec_per_month * 2)); then
+			echo "$((delta_s / sec_per_day)) days ago"
+			return
+		elif ((delta_s < sec_per_year * 2)); then
+			echo "$((delta_s / sec_per_month)) months ago"
+			return
+		else
+			echo "$((delta_s / sec_per_year)) years ago"
+			return
+		fi
 	else
-		echo "$((delta_s / sec_per_year)) years ago"
-		return
+		if ((delta_s > sec_per_year * 2)); then
+			echo "in $((delta_s / sec_per_year)) years"
+			return
+		elif ((delta_s > sec_per_month * 2)); then
+			echo "in $((delta_s / sec_per_month)) months"
+			return
+		elif ((delta_s > sec_per_day * 2)); then
+			echo "in $((delta_s / sec_per_day)) days"
+			return
+		elif ((delta_s > sec_per_hour * 2)); then
+			echo "in $((delta_s / sec_per_hour)) hours"
+			return
+		elif ((delta_s > sec_per_minute * 2)); then
+			echo "in $((delta_s / sec_per_minute)) minutes"
+			return
+		else
+			echo "in $((delta_s)) seconds"
+		fi
 	fi
 }
 
