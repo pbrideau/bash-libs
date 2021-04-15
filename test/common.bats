@@ -173,3 +173,126 @@ function Should_ReturnDir_When_FullPathWithSpaces { #@test
 	[ "$status" -eq 0 ]
 	[ "${lines[0]}" = "/foo/bar bar" ]
 }
+
+function Should_Return5SecondsAgo_When_Asked5SecondsAgo { #@test
+	# Given
+
+	# When
+	run format_date "$(date -d "5 seconds ago")"
+
+	# Then
+	[ "$status" -eq 0 ]
+	[ "${lines[0]}" = "5 seconds ago" ]
+}
+function Should_Return5MinutesAgo_When_Asked5MinutesAgo { #@test
+	# Given
+
+	# When
+	run format_date "$(date -d "5 minutes ago")"
+
+	# Then
+	[ "$status" -eq 0 ]
+	[ "${lines[0]}" = "5 minutes ago" ]
+}
+function Should_Return5HoursAgo_When_Asked5HoursAgo { #@test
+	# Given
+
+	# When
+	run format_date "$(date -d "5 hours ago")"
+
+	# Then
+	[ "$status" -eq 0 ]
+	[ "${lines[0]}" = "5 hours ago" ]
+}
+function Should_Return5DaysAgo_When_Asked5DaysAgo { #@test
+	# Given
+
+	# When
+	run format_date "$(date -d "5 days ago")"
+
+	# Then
+	[ "$status" -eq 0 ]
+	[ "${lines[0]}" = "5 days ago" ]
+}
+function Should_Return5MonthsAgo_When_Asked5MonthsAgo { #@test
+	# Given
+
+	# When
+	run format_date "$(date -d "5 months ago")"
+
+	# Then
+	[ "$status" -eq 0 ]
+	[ "${lines[0]}" = "5 months ago" ]
+}
+function Should_Return5YearsAgo_When_Asked5YearsAgo { #@test
+	# Given
+
+	# When
+	run format_date "$(date -d "5 years ago")"
+
+	# Then
+	[ "$status" -eq 0 ]
+	[ "${lines[0]}" = "5 years ago" ]
+}
+
+function Should_Returnin5Seconds_When_AskedPlus5Seconds { #@test
+	# Given
+
+	# When
+	run format_date "$(date -d "+5 seconds")"
+
+	# Then
+	[ "$status" -eq 0 ]
+	[ "${lines[0]}" = "in 5 seconds" ]
+}
+function Should_Returnin5Minutes_When_AskedPlus5Minutes { #@test
+	# Given
+
+	# When
+	run format_date "$(date -d "+5 minutes")"
+	format_date "$(date -d "+5 minutes")"
+
+	# Then
+	[ "$status" -eq 0 ]
+	[ "${lines[0]}" = "in 5 minutes" ]
+}
+function Should_Returnin5Hours_When_AskedPlus5Hours { #@test
+	# Given
+
+	# When
+	run format_date "$(date -d "+5 hours")"
+
+	# Then
+	[ "$status" -eq 0 ]
+	[ "${lines[0]}" = "in 5 hours" ]
+}
+function Should_Returnin5Days_When_AskedPlus5Days { #@test
+	# Given
+
+	# When
+	run format_date "$(date -d "+5 days")"
+
+	# Then
+	[ "$status" -eq 0 ]
+	[ "${lines[0]}" = "in 5 days" ]
+}
+function Should_Returnin5Months_When_AskedPlus5Months { #@test
+	# Given
+
+	# When
+	run format_date "$(date -d "+5 months")"
+
+	# Then
+	[ "$status" -eq 0 ]
+	[ "${lines[0]}" = "in 5 months" ]
+}
+function Should_Returnin5Years_When_AskedPlus5Years { #@test
+	# Given
+
+	# When
+	run format_date "$(date -d "+5 years")"
+
+	# Then
+	[ "$status" -eq 0 ]
+	[ "${lines[0]}" = "in 5 years" ]
+}
