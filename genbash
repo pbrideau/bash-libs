@@ -6,9 +6,10 @@
 #       CREATED: 2021-01-29
 #      REVISION: 0.0.3: Use semver_compare for common version validation
 #                0.1.0: Add ~/.genbashrc config for author
+#                0.1.1: Add /usr/local search path for common.sh
 #===============================================================================
 # template: 2021.01.29
-VERSION="0.1.0"
+VERSION="0.1.1"
 REQUIRED_COMMON_VERSION="2021.02.13"
 
 set -o nounset   # Treat unset variable as an error
@@ -27,6 +28,7 @@ function check_dependency {
 	local search_common_path=(
 		"${DIRNAME}/common.sh"
 		"$HOME/.local/lib/bash-libs/common.sh"
+		"/usr/local/lib/bash-libs/common.sh"
 	)
 
 	for p in "${search_common_path[@]}"; do
