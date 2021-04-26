@@ -6,7 +6,7 @@
 #       CREATED: ---
 #      REVISION: ---
 #===============================================================================
-# template: 2021.04.15
+# template: 2021.04.26
 VERSION="0.0.1"
 ## --common start ##
 REQUIRED_COMMON_VERSION="" #should be populated by genbash during generation
@@ -35,18 +35,28 @@ export EX_USAGE=64 # Command line usage error
 function check_dependency {
 	## --common start ##
 	local common_path
-	if [ -f "${DIRNAME}/common.sh" ]; then
-		# shellcheck source=./common.sh
-		source "${DIRNAME}/common.sh"
-		common_path="${DIRNAME}/common.sh"
-	elif [ -f "$HOME/.local/share/bash-libs/common.sh" ]; then
-		# shellcheck disable=SC1090
-		source "$HOME/.local/share/bash-libs/common.sh"
-		common_path="$HOME/.local/share/bash-libs/common.sh"
-	else
-		echo "Could not find common.sh"
-		echo "Should be in ./ or in ~/.local"
-		exit "$EX_NOTFOUND"
+	local search_common_path=(
+		"${DIRNAME}/common.sh"
+		"$HOME/.local/lib/bash-libs/common.sh"
+		"/usr/local/lib/bash-libs/common.sh"
+	)
+
+	for p in "${search_common_path[@]}"; do
+		if [ -f "$p" ]; then
+			# shellcheck source=./common.sh
+			source "$p"
+			common_path="$p"
+			break
+		fi
+	done
+
+	if [ "$common_path" = "" ]; then
+		echo "Could not find common.sh:"
+		for p in "${search_common_path[@]}"; do
+			echo "  $p"
+		done
+		echo "You could find it on: https://github.com/pbrideau/bash-libs"
+		exit 1
 	fi
 
 	local compare
