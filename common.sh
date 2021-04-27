@@ -465,96 +465,96 @@ function format_date {
 #                 -1 when A lower than B
 #         USAGE:  compare_semver '1.2.3' '4.5.6'
 #-------------------------------------------------------------------------------
-function ord {
-	# params char
-	# returns Integer
-	printf '%d' "'$1"
-}
-function isNumber {
-	string=$1
-	char=""
-	while true; do
-		substract="${string#?}"       # All but the first character of the string
-		char="${string%"$substract"}" # Remove $rest, and you're left with the first character
-		string="$substract"
-		# no more chars to compare then success
-		if [ -z "$char" ]; then
-			printf "true"
-			return 1
-		fi
-		# break if some of the chars is not a number
-		if [ "$(ord "$char")" -lt 48 ] || [ "$(ord "$char")" -gt 57 ]; then
-			printf "false"
-			return 0
-		fi
-	done
-}
-function getChar {
-	# params string {String}, Index {Number}
-	# returns char
-	string=$1
-	index=$2
-	cursor=-1
-	char=""
-	while [ "$cursor" != "$index" ]; do
-		substract="${string#?}"       # All but the first character of the string
-		char="${string%"$substract"}" # Remove $rest, and you're left with the first character
-		string="$substract"
-		cursor=$((cursor + 1))
-	done
-	printf "%s$char"
-}
-function outcome {
-	result=$1
-	printf "%s$result\n"
-}
-function compareNumber {
-	if [ -z "$1" ] && [ -z "$2" ]; then
-		printf "%s" "0"
-		return
-	fi
-
-	[ $(($2 - $1)) -gt 0 ] && printf "%s" "-1"
-	[ $(($2 - $1)) -lt 0 ] && printf "1"
-	[ $(($2 - $1)) = 0 ] && printf "0"
-}
-function compareString {
-	result=false
-	index=0
-	while true; do
-		a=$(getChar "$1" $index)
-		b=$(getChar "$2" $index)
-
-		if [ -z "$a" ] && [ -z "$b" ]; then
-			printf "0"
-			return
-		fi
-
-		ord_a=$(ord "$a")
-		ord_b=$(ord "$b")
-
-		if [ "$(compareNumber "$ord_a" "$ord_b")" != "0" ]; then
-			printf "%s" "$(compareNumber "$ord_a" "$ord_b")"
-			return
-		fi
-
-		index=$((index + 1))
-	done
-}
-function includesString {
-	string="$1"
-	substring="$2"
-	if [ "${string#*$substring}" != "$string" ]; then
-		printf "1"
-		return 1 # $substring is in $string
-	fi
-	printf "0"
-	return 0 # $substring is not in $string
-}
-function removeLeadingV {
-	printf "%s${1#v}"
-}
 function semver_compare {
+	function ord {
+		# params char
+		# returns Integer
+		printf '%d' "'$1"
+	}
+	function isNumber {
+		string=$1
+		char=""
+		while true; do
+			substract="${string#?}"       # All but the first character of the string
+			char="${string%"$substract"}" # Remove $rest, and you're left with the first character
+			string="$substract"
+			# no more chars to compare then success
+			if [ -z "$char" ]; then
+				printf "true"
+				return 1
+			fi
+			# break if some of the chars is not a number
+			if [ "$(ord "$char")" -lt 48 ] || [ "$(ord "$char")" -gt 57 ]; then
+				printf "false"
+				return 0
+			fi
+		done
+	}
+	function getChar {
+		# params string {String}, Index {Number}
+		# returns char
+		string=$1
+		index=$2
+		cursor=-1
+		char=""
+		while [ "$cursor" != "$index" ]; do
+			substract="${string#?}"       # All but the first character of the string
+			char="${string%"$substract"}" # Remove $rest, and you're left with the first character
+			string="$substract"
+			cursor=$((cursor + 1))
+		done
+		printf "%s$char"
+	}
+	function outcome {
+		result=$1
+		printf "%s$result\n"
+	}
+	function compareNumber {
+		if [ -z "$1" ] && [ -z "$2" ]; then
+			printf "%s" "0"
+			return
+		fi
+
+		[ $(($2 - $1)) -gt 0 ] && printf "%s" "-1"
+		[ $(($2 - $1)) -lt 0 ] && printf "1"
+		[ $(($2 - $1)) = 0 ] && printf "0"
+	}
+	function compareString {
+		result=false
+		index=0
+		while true; do
+			a=$(getChar "$1" $index)
+			b=$(getChar "$2" $index)
+
+			if [ -z "$a" ] && [ -z "$b" ]; then
+				printf "0"
+				return
+			fi
+
+			ord_a=$(ord "$a")
+			ord_b=$(ord "$b")
+
+			if [ "$(compareNumber "$ord_a" "$ord_b")" != "0" ]; then
+				printf "%s" "$(compareNumber "$ord_a" "$ord_b")"
+				return
+			fi
+
+			index=$((index + 1))
+		done
+	}
+	function includesString {
+		string="$1"
+		substring="$2"
+		if [ "${string#*$substring}" != "$string" ]; then
+			printf "1"
+			return 1 # $substring is in $string
+		fi
+		printf "0"
+		return 0 # $substring is not in $string
+	}
+	function removeLeadingV {
+		printf "%s${1#v}"
+	}
 	firstParam=$1  #1.2.4-alpha.beta+METADATA
 	secondParam=$2 #1.2.4-alpha.beta.2+METADATA
 
