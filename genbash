@@ -283,8 +283,8 @@ function validate_inputs {
 	log 3 "Locating common.sh"
 	if [ -e "${DIRNAME}/common.sh" ]; then
 		BASH_COMMON="${DIRNAME}/common.sh"
-	elif [ -e "${HOME}/.local/share/bash-libs/common.sh" ]; then
-		BASH_COMMON="${HOME}/.local/share/bash-libs/common.sh"
+	elif [ -e "${HOME}/.local/lib/bash-libs/common.sh" ]; then
+		BASH_COMMON="${HOME}/.local/lib/bash-libs/common.sh"
 	else
 		log 0 "Could not locate common.sh"
 		log 0 "Was ${BASENAME} installed correctly?"
