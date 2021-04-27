@@ -285,7 +285,7 @@ function set_colors {
 
 #---  FUNCTION  ----------------------------------------------------------------
 #          NAME:  load_config
-#   DESCRIPTION:  Send file content to be parsed by load_arg
+#   DESCRIPTION:  Send file content to be parsed by load_getopt_arg
 #                 Stop at the first config file loaded
 #       GLOBALS:  END_LOAD_ARG
 #    PARAMETERS:  1) string array: config files to parse
