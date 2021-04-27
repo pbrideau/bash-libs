@@ -256,10 +256,10 @@ function validate_inputs {
 	log 3 "Locating bash-template"
 	case "$BASH_TEMPLATE" in
 		getopt)
-			if [ -e "${DIRNAME}/bash-template" ]; then
-				BASH_TEMPLATE_PATH="${DIRNAME}/bash-template"
-			elif [ -e "${HOME}/.local/share/bash-libs/bash-template" ]; then
-				BASH_TEMPLATE_PATH="${HOME}/.local/share/bash-libs/bash-template"
+			if [ -e "${DIRNAME}/bash-template-getopt" ]; then
+				BASH_TEMPLATE_PATH="${DIRNAME}/bash-template-getopt"
+			elif [ -e "${HOME}/.local/share/bash-libs/bash-template-getopt" ]; then
+				BASH_TEMPLATE_PATH="${HOME}/.local/share/bash-libs/bash-template-getopt"
 			else
 				log 0 "Could not locate bash-template"
 				log 0 "Was ${BASENAME} installed correctly?"
