@@ -158,7 +158,7 @@ function spinner {
 		log 1 "running: $process_name"
 	fi
 	while ps -q "$job" &> /dev/null; do
-		if [ "$LOG_LEVEL" -ne 0 ]; then
+		if [ "${LOG_LEVEL:-1}" -ne 0 ]; then
 			if [ "${PARSEABLE:-true}" = true ]; then
 				echo -n '.'
 			else
@@ -172,7 +172,7 @@ function spinner {
 		fi
 		sleep 1
 	done
-	if [ "$LOG_LEVEL" -ne 0 ] && [ "${PARSEABLE:-true}" = false ]; then
+	if [ "${LOG_LEVEL:-1}" -ne 0 ] && [ "${PARSEABLE:-true}" = false ]; then
 		log chkok "$process_name Done in $((SECONDS - start_time)) seconds"
 	fi
 }
