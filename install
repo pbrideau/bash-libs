@@ -1,6 +1,0 @@
-#!/bin/bash
-
-install -vD common.sh "${HOME}/.local/lib/bash-libs/common.sh"
-install -vD bash-template-getopt "${HOME}/.local/share/bash-libs/bash-template-getopt"
-install -vD bash-template-docopt "${HOME}/.local/share/bash-libs/bash-template-docopt"
-install -vD genbash "${HOME}/.local/bin/genbash"
