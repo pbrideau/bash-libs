@@ -4,8 +4,8 @@
 load 'test_helper/bats-support/load'
 load 'test_helper/bats-assert/load'
 
-cmd_hard_to_parse='./bash-template'
-cmd=(./bash-template --parseable)
+cmd_hard_to_parse='./bash-template-getopt'
+cmd=(./bash-template-getopt --parseable)
 FIXTURE_ROOT="$BATS_TEST_DIRNAME/fixtures"
 
 function Should_FailAndPrintUsageInColor_When_NoCommand { #@test
