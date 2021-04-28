@@ -186,7 +186,7 @@ function spinner {
 #       RETURNS:
 #-------------------------------------------------------------------------------
 function set_colors {
-	local colors=$1
+	local colors=${1:-true}
 	function no_colors {
 		txtblk=
 		txtred=
