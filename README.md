@@ -10,10 +10,10 @@ Libraries usefull for clean and quick scripts developments
 ```bash
 $ make install
 Installing…
-install -m 644 common.sh /home/ext11363/.local/lib/bash-libs
-install -m 644 bash-template /home/ext11363/.local/share/bash-libs
-install -m 644 bash-template-docopt /home/ext11363/.local/share/bash-libs
-install -m 755 genbash /home/ext11363/.local/bin
+install -m 644 common.sh /home/user/.local/lib/bash-libs
+install -m 644 bash-template /home/user/.local/share/bash-libs
+install -m 644 bash-template-docopt /home/user/.local/share/bash-libs
+install -m 755 genbash /home/user/.local/bin
 ```
 
 ## genbash
