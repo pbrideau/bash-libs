@@ -227,6 +227,26 @@ function set_colors {
 		set_bldund
 	}
 
+	function yes_colors_ansi {
+		txtblk="\033[30m"
+		txtred="\033[31m"
+		txtgrn="\033[32m"
+		txtylw="\033[33m"
+		txtblu="\033[34m"
+		txtpur="\033[35m"
+		txtcyn="\033[36m"
+		txtwht="\033[37m"
+		bakblk="\033[40m"
+		bakred="\033[41m"
+		bakgrn="\033[42m"
+		bakylw="\033[43m"
+		bakblu="\033[44m"
+		bakpur="\033[45m"
+		bakcyn="\033[46m"
+		bakwht="\033[47m"
+		set_bldund
+	}
+
 	function set_bldund {
 		bldblk=${txtbld}${txtblk}
 		bldred=${txtbld}${txtred}
@@ -256,8 +276,8 @@ function set_colors {
 
 	if [ "$colors" = true ]; then
 		if ! command -v tput &> /dev/null; then
-			log 1 "tput command not found, no colors will be displayed"
-			colors=false
+			log 1 "tput command not found, ANSI escape code will be used"
+			colors=ANSI
 		elif ! tty -s; then
 			log 1 "Not interractive shell, disabling colors"
 			colors=false
@@ -274,6 +294,12 @@ function set_colors {
 		if [ -n "$ncolors" ] && [ "$ncolors" -ge 8 ]; then
 			yes_colors
 		fi
+	elif [ "$colors" = "ANSI" ]; then
+		txtund="\033[4m" # Underline
+		txtbld="\033[1m" # Bold
+		txtrst="\033[0m" # Reset
+		txtcr="\r"       # Carriage return (start of line)
+		yes_colors_ansi
 	fi
 
 	export txtund txtbld txtrst txtcr
