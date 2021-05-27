@@ -319,6 +319,7 @@ function load_arg {
 		'example'
 		'yes'
 		'parseable'
+		'sigusr'
 	)
 
 	IFS=','
