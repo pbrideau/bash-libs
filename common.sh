@@ -17,7 +17,7 @@
 # You can get the lastest version here:
 # https://github.com/pbrideau/bash-libs
 
-export COMMON_VERSION="2021.04.28"
+export COMMON_VERSION="2021.05.27"
 
 #---  FUNCTION  ----------------------------------------------------------------
 #          NAME:  log
@@ -772,6 +772,35 @@ function semver_compare {
 		# Proceed to the next identifier because previous comparition was equal.
 		cursor=$((cursor + 1))
 	done
+}
+
+#---  FUNCTION  ----------------------------------------------------------------
+#          NAME:  on_exit
+#   DESCRIPTION:  add command to be run when script exit
+#                 From: https://www.linuxjournal.com/content/use-bash-trap-statement-cleanup-temporary-files
+#       GLOBALS:
+#    PARAMETERS:  1) string: command to execute when shell exit
+#        OUTPUT:
+#       RETURNS:
+#         USAGE:  on_exit "rm -f /tmp/foo"
+#-------------------------------------------------------------------------------
+ON_EXIT_ITEMS=()
+function on_exit {
+	log 3 "${FUNCNAME[0]}()"
+	function __run_on_exit {
+		log 3 "${FUNCNAME[0]}()"
+		for i in "${ON_EXIT_ITEMS[@]}"; do
+			log 3 "running: $i"
+			eval "$i"
+		done
+	}
+	local n=${#ON_EXIT_ITEMS[*]}
+	ON_EXIT_ITEMS[$n]="$*"
+	if [[ $n -eq 0 ]]; then
+		log 3 "Setting trap __run_on_exit()"
+		trap __run_on_exit EXIT
+	fi
+	log 3 "Trap '$*' added on exit"
 }
 
 # Reserved return codes
