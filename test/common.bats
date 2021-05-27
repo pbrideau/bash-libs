@@ -296,3 +296,15 @@ function Should_Returnin5Years_When_AskedPlus5Years { #@test
 	[ "$status" -eq 0 ]
 	[ "${lines[0]}" = "in 5 years" ]
 }
+
+function Should_RemoveFileOnExit_When_TrapRemoveOnExit { #@test
+	# Given
+	touch /tmp/fileToRemoveOnExit
+
+	# When
+	run on_exit "rm -f /tmp/fileToRemoveOnExit"
+
+	# Then
+	[ "$status" -eq 0 ]
+	[ ! -e "/tmp/fileToRemoveOnExit" ]
+}
