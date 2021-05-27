@@ -98,7 +98,7 @@ function Should_Fail_When_AnswerNoToPromptUserAbort { #@test
 	# Given
 
 	# When
-	run prompt_user_abort "Are you sure?" <<<'No'
+	run prompt_user_abort "Are you sure?" <<< 'No'
 
 	# Then
 	[ "$status" -eq 1 ]
@@ -107,7 +107,7 @@ function Should_Succeed_When_AnswerYesToPromptUserAbort { #@test
 	# Given
 
 	# When
-	run prompt_user_abort "Are you sure?" <<<'Yes'
+	run prompt_user_abort "Are you sure?" <<< 'Yes'
 
 	# Then
 	[ "$status" -eq 0 ]
