@@ -308,3 +308,8 @@ function Should_RemoveFileOnExit_When_TrapRemoveOnExit { #@test
 	[ "$status" -eq 0 ]
 	[ ! -e "/tmp/fileToRemoveOnExit" ]
 }
+
+#Clean up if something went wrong
+function teardown {
+	rm -f /tmp/fileToRemoveOnExit
+}
