@@ -1,4 +1,4 @@
-#!/bin/bash -
+#!/usr/bin/env bash
 # Copyright (C) 2020-2021 Patrick Brideau
 #
 # This program is free software: you can redistribute it and/or modify

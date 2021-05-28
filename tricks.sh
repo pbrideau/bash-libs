@@ -1,4 +1,4 @@
-#!/bin/bash -
+#!/usr/bin/env bash
 
 # This is a list of common tricks to be used within bash scripts
 

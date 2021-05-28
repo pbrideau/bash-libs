@@ -1,4 +1,4 @@
-#!/bin/bash -
+#!/usr/bin/env bash
 #===============================================================================
 #   DESCRIPTION: Generate a bash script template
 #
@@ -7,9 +7,10 @@
 #      REVISION: 0.0.3: Use semver_compare for common version validation
 #                0.1.0: Add ~/.genbashrc config for author
 #                0.1.1: Add /usr/local search path for common.sh
+#                0.1.2: Use /usr/bin/env bash instead of /bin/bash
 #===============================================================================
 # template: 2021.01.29
-VERSION="0.1.1"
+VERSION="0.1.2"
 REQUIRED_COMMON_VERSION="2021.02.13"
 
 set -o nounset   # Treat unset variable as an error

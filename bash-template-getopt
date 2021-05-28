@@ -1,4 +1,4 @@
-#!/bin/bash -
+#!/usr/bin/env bash
 #===============================================================================
 #   DESCRIPTION: ---
 #
@@ -6,7 +6,7 @@
 #       CREATED: ---
 #      REVISION: ---
 #===============================================================================
-# template: 2021.04.26
+# template: 2021.05.28
 VERSION="0.0.1"
 ## --common start ##
 REQUIRED_COMMON_VERSION="" #should be populated by genbash during generation
