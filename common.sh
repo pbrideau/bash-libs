@@ -144,8 +144,14 @@ function spinner {
 	log 3 "${FUNCNAME[0]}()"
 	local job=$1
 	local process_name
+	local eval_process_name=false
 	if [ $# -gt 1 ]; then
 		process_name=$2
+		if [[ "$process_name" =~ \$ ]]; then
+			eval_process_name=true
+			log 3 "dollar sign ($) in process_name: ${bldred}$process_name${txtrst}"
+			log 3 "Will be run by eval function: ${bldylw}$(eval echo "$2")${txtrst}"
+		fi
 	else
 		process_name=$(ps -q "$job" -o comm=)
 	fi
@@ -160,6 +166,9 @@ function spinner {
 	fi
 	while ps -q "$job" &> /dev/null; do
 		if [ "${LOG_LEVEL:-1}" -ne 0 ]; then
+			if [ "$eval_process_name" = true ]; then
+				process_name=$(eval echo "$2")
+			fi
 			if [ "${PARSEABLE:-true}" = true ]; then
 				echo -n '.'
 			else
