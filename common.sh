@@ -151,6 +151,7 @@ function spinner {
 	fi
 	local spinstr='\|/-'
 	local start_time=$SECONDS
+	declare -i run_time
 	local temp
 
 	log 3 "background job pid: $job"
@@ -163,17 +164,44 @@ function spinner {
 				echo -n '.'
 			else
 				temp="${spinstr#?}"
-				printf "${txtcr}[%c] %s (%ds)" \
-					"${spinstr}" \
-					"$process_name" \
-					"$((SECONDS - start_time))"
+				run_time=$((SECONDS - start_time))
+				if [ "$run_time" -lt 60 ]; then
+					printf "${txtcr}[%c] %s (%ds)" \
+						"${spinstr}" \
+						"$process_name" \
+						"$run_time"
+				elif [ "$run_time" -lt 3600 ]; then
+					printf "${txtcr}[%c] %s (%dm%02ds)" \
+						"${spinstr}" \
+						"$process_name" \
+						"$((run_time / 60))" \
+						"$((run_time % 60))"
+				else
+					printf "${txtcr}[%c] %s (%dh%02dm%02ds)" \
+						"${spinstr}" \
+						"$process_name" \
+						"$((run_time / 3600))" \
+						"$((run_time / 60 % 60))" \
+						"$((run_time % 60))"
+				fi
 				spinstr=${temp}${spinstr%"$temp"}
 			fi
 		fi
 		sleep 1
 	done
 	if [ "${LOG_LEVEL:-1}" -ne 0 ] && [ "${PARSEABLE:-true}" = false ]; then
-		log chkok "$process_name Done in $((SECONDS - start_time)) seconds"
+		local str_time
+		if [ "$run_time" -lt 60 ]; then
+			str_time=$(printf '%ds' "$run_time")
+		elif [ "$run_time" -lt 3600 ]; then
+			str_time=$(printf '%dm%02ds' "$((run_time / 60))" "$((run_time % 60))")
+		else
+			str_time=$(
+				printf '%dh%02dm%02ds' \
+					"$((run_time / 3600))" "$((run_time / 60 % 60))" "$((run_time % 60))"
+			)
+		fi
+		log chkok "$process_name. Done in $str_time"
 	fi
 }
 
