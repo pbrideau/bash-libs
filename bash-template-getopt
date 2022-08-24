@@ -343,10 +343,10 @@ if [ "${BASH_SOURCE[0]}" = "${0}" ]; then
 
 	declare -a END_LOAD_ARG
 	load_getopt_arg "$@"
-	eval set --
+	set --
 	if [ "${#END_LOAD_ARG[@]}" -gt 0 ]; then
 		for arg in "${END_LOAD_ARG[@]}"; do
-			eval set -- "$@" "'$arg'"
+			set -- "$@" "'$arg'"
 		done
 	fi
 
