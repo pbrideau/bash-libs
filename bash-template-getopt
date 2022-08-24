@@ -335,14 +335,11 @@ VAR_B='default_value'
 # Start functions
 if [ "${BASH_SOURCE[0]}" = "${0}" ]; then
 	check_dependency
-	tmp_loglv="$LOG_LEVEL"
-	LOG_LEVEL=0
-	set_colors false
-	LOG_LEVEL="$tmp_loglv"
-	unset tmp_loglv
 
 	declare -a END_LOAD_ARG
 	load_getopt_arg "$@"
+	set_colors $COLORS
+
 	set --
 	if [ "${#END_LOAD_ARG[@]}" -gt 0 ]; then
 		for arg in "${END_LOAD_ARG[@]}"; do
@@ -355,8 +352,6 @@ if [ "${BASH_SOURCE[0]}" = "${0}" ]; then
 	## --config end ##
 	log 3 "pid: $$"
 	validate_inputs
-
-	set_colors $COLORS
 
 	if [ $# -eq 0 ]; then
 		log 0 'No command given'
