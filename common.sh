@@ -609,7 +609,7 @@ function semver_compare {
 	function includesString {
 		string="$1"
 		substring="$2"
-		if [ "${string#*$substring}" != "$string" ]; then
+		if [ "${string#*"$substring"}" != "$string" ]; then
 			printf "1"
 			return 1 # $substring is in $string
 		fi
@@ -632,7 +632,7 @@ function semver_compare {
 	a_patch=$(printf %s "$version_a" | cut -d'.' -f 3 | cut -d'-' -f 1)
 	a_pre=""
 	if [ "$(includesString "$version_a" -)" = 1 ]; then
-		a_pre=$(printf %s"${version_a#$a_major.$a_minor.$a_patch-}")
+		a_pre=$(printf %s"${version_a#"$a_major"."$a_minor"."$a_patch"-}")
 	fi
 
 	b_major=$(printf %s "$version_b" | cut -d'.' -f 1)
@@ -640,7 +640,7 @@ function semver_compare {
 	b_patch=$(printf %s "$version_b" | cut -d'.' -f 3 | cut -d'-' -f 1)
 	b_pre=""
 	if [ "$(includesString "$version_b" -)" = 1 ]; then
-		b_pre=$(printf %s"${version_b#$b_major.$b_minor.$b_patch-}")
+		b_pre=$(printf %s"${version_b#"$b_major"."$b_minor"."$b_patch"-}")
 	fi
 
 	unit_types="MAJOR MINOR PATCH"
