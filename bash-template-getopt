@@ -237,6 +237,7 @@ function load_getopt_arg {
 	opt=$(getopt -o "$SHORT_OPTIONS" --long "$LONG_OPTIONS" -- "$@")
 	rc=$?
 	if [ "$rc" -ne 0 ]; then
+		log 0 "See --help for more details"
 		exit "$EX_USAGE"
 	fi
 	eval set -- "$opt"
@@ -340,12 +341,15 @@ if [ "${BASH_SOURCE[0]}" = "${0}" ]; then
 	load_getopt_arg "$@"
 	set_colors $COLORS
 
+	# Remove all args out of $@, and put back only what has not been parsed
+	log 3 "args before parsing: $*"
 	set --
 	if [ "${#END_LOAD_ARG[@]}" -gt 0 ]; then
 		for arg in "${END_LOAD_ARG[@]}"; do
 			set -- "$@" "'$arg'"
 		done
 	fi
+	log 3 "remaining args after parsing: $*"
 
 	## --config start ##
 	load_getopt_config "${CONFIG_FILES[@]}"
