@@ -17,7 +17,7 @@
 # You can get the lastest version here:
 # https://github.com/pbrideau/bash-libs
 
-export COMMON_VERSION="2021.06.20"
+export COMMON_VERSION="2022.08.24"
 
 #---  FUNCTION  ----------------------------------------------------------------
 #          NAME:  log
@@ -312,12 +312,12 @@ function set_colors {
 	export COLORS_SET=true
 
 	if [ "$colors" = true ]; then
-		if ! command -v tput &> /dev/null; then
-			log 1 "tput command not found, ANSI escape code will be used"
-			colors=ANSI
-		elif ! tty -s; then
+		if ! tty -s; then
 			log 1 "Not interractive shell, disabling colors"
 			colors=false
+		elif ! command -v tput &> /dev/null; then
+			log 1 "tput command not found, ANSI escape code will be used"
+			colors=ANSI
 		fi
 	fi
 
