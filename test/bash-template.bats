@@ -85,8 +85,8 @@ function Should_SucceedAndLoadConfig_When_ConfigArgument { #@test
 		run
 
 	assert_success
-	assert_line "$(tput cr)[warn ] This show a warning to stderr"
-	assert_line "$(tput cr)[error] This show an error to stderr"
+	error_colored_tag="$(tput cr)$(tput sgr0)[$(tput setaf 1)error$(tput sgr0)]"
+	assert_line "${error_colored_tag} This show an error to stderr"
 }
 
 function Should_Succeed_When_AnswerYesToAsk { #@test
@@ -123,4 +123,3 @@ function Should_Succeed_When_AskInNonInteractiveShellAlwaysYesArgument { #@test
 		assert_success
 	}
 }
-
