@@ -309,6 +309,77 @@ function Should_RemoveFileOnExit_When_TrapRemoveOnExit { #@test
 	[ ! -e "/tmp/fileToRemoveOnExit" ]
 }
 
+function Should_ReturnOne_When_AGreaterThanB { #@test
+	# Given
+
+	# When
+	run semver_compare "1.0.0" "0.9.9"
+
+	# Then
+	[ "$status" -eq 0 ]
+	[ "${lines[0]}" = "1" ]
+}
+function Should_ReturnOne_When_SmallAGreaterThanBigB { #@test
+	# Given
+
+	# When
+	run semver_compare "1" "0.9.9"
+
+	# Then
+	[ "$status" -eq 0 ]
+	[ "${lines[0]}" = "1" ]
+}
+function Should_ReturnOne_When_AGreaterThanBAlpha { #@test
+	# Given
+
+	# When
+	run semver_compare "1.0.0" "1.0.0-alpha"
+
+	# Then
+	[ "$status" -eq 0 ]
+	[ "${lines[0]}" = "1" ]
+}
+function Should_ReturnZero_When_AEqualB { #@test
+	# Given
+
+	# When
+	run semver_compare "1.0.0" "1.0.0"
+
+	# Then
+	[ "$status" -eq 0 ]
+	[ "${lines[0]}" = "0" ]
+}
+function Should_ReturnMinusOne_When_ALowerThanB { #@test
+	# Given
+
+	# When
+	run semver_compare "0.9.0" "1.0.0"
+
+	# Then
+	[ "$status" -eq 0 ]
+	[ "${lines[0]}" = "-1" ]
+}
+function Should_ReturnMinusOne_When_BigALowerThanSmallB { #@test
+	# Given
+
+	# When
+	run semver_compare "0.9.9" "1"
+
+	# Then
+	[ "$status" -eq 0 ]
+	[ "${lines[0]}" = "-1" ]
+}
+function Should_ReturnMinusOne_When_AAlphaLowerThanB { #@test
+	# Given
+
+	# When
+	run semver_compare "1.0.0-alpha" "1.0.0"
+
+	# Then
+	[ "$status" -eq 0 ]
+	[ "${lines[0]}" = "-1" ]
+}
+
 #Clean up if something went wrong
 function teardown {
 	rm -f /tmp/fileToRemoveOnExit
