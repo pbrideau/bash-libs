@@ -41,6 +41,12 @@ function Should_Fail_when_TooManyCommands { #@test
 	assert_failure 64
 	assert_line --index 0 "$(tput cr)[error] Too many commands given: Foo Bar"
 }
+function Should_FailWithFullCommand_when_CommandsWithSpace { #@test
+	run "${cmd[@]}" 'Foo Bar'
+
+	assert_failure 64
+	assert_line "$(tput cr)[error] No such command: Foo Bar"
+}
 
 function Should_SucceedAndPrintLog0_When_RunQuiet { #@test
 	run "${cmd[@]}" run --quiet
