@@ -53,7 +53,7 @@ function Should_LogDebugToStderr_When_Log3 { #@test
 
 	# Then
 	[ "$status" -eq 0 ]
-	[ "${lines[0]}" = "$(tput cr)[debug]======== Debug" ]
+	[ "${lines[0]}" = "$(tput cr)[debug]========== Debug" ]
 	# Note this debug run 4 funtions deep within the bats stack
 	# This is why there is this much '=='
 }
