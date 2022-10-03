@@ -346,7 +346,9 @@ if [ "${BASH_SOURCE[0]}" = "${0}" ]; then
 	set --
 	if [ "${#END_LOAD_ARG[@]}" -gt 0 ]; then
 		for arg in "${END_LOAD_ARG[@]}"; do
-			set -- "$@" "'$arg'"
+			a=("$arg")
+			set -- "$@" "${a[*]}"
+			unset a
 		done
 	fi
 	log 3 "remaining args after parsing: $*"
