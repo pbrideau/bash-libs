@@ -6,6 +6,7 @@ repos:
       stages: [commit]
     - id: script-must-have-extension
       stages: [commit]
+      exclude: '.*\.bats'
     - id: script-must-not-have-extension
       stages: [commit]
     - id: shellcheck
