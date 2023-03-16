@@ -297,16 +297,19 @@ function Should_Returnin5Years_When_AskedPlus5Years { #@test
 	[ "${lines[0]}" = "in 5 years" ]
 }
 
-function Should_RemoveFileOnExit_When_TrapRemoveOnExit { #@test
+function Should_RemoveFilesOnExit_When_TrapRemoveOnExit { #@test
 	# Given
 	touch /tmp/fileToRemoveOnExit
+	touch /tmp/anotherfileToRemoveOnExit
 
 	# When
 	run on_exit "rm -f /tmp/fileToRemoveOnExit"
+	run on_exit "rm -f /tmp/anotherfileToRemoveOnExit"
 
 	# Then
 	[ "$status" -eq 0 ]
 	[ ! -e "/tmp/fileToRemoveOnExit" ]
+	[ ! -e "/tmp/anotherfileToRemoveOnExit" ]
 }
 
 function Should_ReturnOne_When_AGreaterThanB { #@test
@@ -383,4 +386,5 @@ function Should_ReturnMinusOne_When_AAlphaLowerThanB { #@test
 #Clean up if something went wrong
 function teardown {
 	rm -f /tmp/fileToRemoveOnExit
+	rm -f /tmp/anotherfileToRemoveOnExit
 }
