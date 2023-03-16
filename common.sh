@@ -17,7 +17,7 @@
 # You can get the lastest version here:
 # https://github.com/pbrideau/bash-libs
 
-export COMMON_VERSION="2022.08.24"
+export COMMON_VERSION="2023.03.16"
 
 #---  FUNCTION  ----------------------------------------------------------------
 #          NAME:  log
@@ -824,6 +824,7 @@ function semver_compare {
 ON_EXIT_ITEMS=()
 function on_exit {
 	log 3 "${FUNCNAME[0]}()"
+	# shellcheck disable=SC2317 # This function is called indirectly by trap
 	function __run_on_exit {
 		log 3 "${FUNCNAME[0]}()"
 		for i in "${ON_EXIT_ITEMS[@]}"; do
@@ -832,7 +833,7 @@ function on_exit {
 		done
 	}
 	local n=${#ON_EXIT_ITEMS[*]}
-	ON_EXIT_ITEMS[$n]="$*"
+	ON_EXIT_ITEMS[n]="$*"
 	if [[ $n -eq 0 ]]; then
 		log 3 "Setting trap __run_on_exit()"
 		trap __run_on_exit EXIT
