@@ -160,8 +160,9 @@ function spinner {
 		process_name=$2
 		if [[ "${process_name}" =~ \$ ]]; then
 			eval_process_name=true
+			eval_process=$(eval echo "$2")
 			log 3 "dollar sign ($) in process_name: ${bldred}${process_name}${txtrst}"
-			log 3 "Will be run by eval function: ${bldylw}$(eval echo "$2" || true)${txtrst}"
+			log 3 "Will be run by eval function: ${bldylw}${eval_process}${txtrst}"
 		fi
 	else
 		process_name=$(ps -q "${job}" -o comm=)
