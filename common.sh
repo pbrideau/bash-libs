@@ -785,9 +785,11 @@ function semver_compare {
 		else
 			# Spec 11.4.2
 			# Identifiers with letters or hyphens are compared lexically in ASCII sort order.
-			if [[ "$(compareString "${a}" "${b}")" != "0" ]]; then
-				log 3 "cardinal is not equal $(compareString a b)"
-				outcome "$(compareString "${a}" "${b}")"
+
+			s=$(compareString "${a}" "${b}")
+			if [[ "${s}" != "0" ]]; then
+				log 3 "cardinal is not equal ${s}"
+				outcome "${s}"
 				return
 			fi
 		fi
