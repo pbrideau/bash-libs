@@ -613,8 +613,9 @@ function semver_compare {
 			ord_a=$(ord "${a}")
 			ord_b=$(ord "${b}")
 
-			if [[ "$(compareNumber "${ord_a}" "${ord_b}" || true)" != "0" ]]; then
-				printf "%s" "$(compareNumber "${ord_a}" "${ord_b}" || true)"
+			n=$(compareNumber "${ord_a}" "${ord_b}")
+			if [[ "${n}" != "0" ]]; then
+				printf "%s" "${n}"
 				return
 			fi
 
