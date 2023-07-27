@@ -6,7 +6,7 @@
 #       CREATED: ---
 #      REVISION: ---
 #===============================================================================
-# template: 2022.10.03
+# template: 2023.07.27
 VERSION="0.0.1"
 ## --common start ##
 REQUIRED_COMMON_VERSION="" #should be populated by genbash during generation
@@ -37,51 +37,51 @@ function check_dependency {
 	local common_path
 	local search_common_path=(
 		"${DIRNAME}/common.sh"
-		"$HOME/.local/lib/bash-libs/common.sh"
+		"${HOME}/.local/lib/bash-libs/common.sh"
 		"/usr/local/lib/bash-libs/common.sh"
 	)
 
 	for p in "${search_common_path[@]}"; do
-		if [ -f "$p" ]; then
+		if [[ -f "${p}" ]]; then
 			# shellcheck source=./common.sh
-			source "$p"
-			common_path="$p"
+			source "${p}"
+			common_path="${p}"
 			break
 		fi
 	done
 
-	if [ "$common_path" = "" ]; then
+	if [[ "${common_path}" == "" ]]; then
 		echo "Could not find common.sh:"
 		for p in "${search_common_path[@]}"; do
-			echo "  $p"
+			echo "  ${p}"
 		done
 		echo "You could find it on: https://github.com/pbrideau/bash-libs"
 		exit 1
 	fi
 
 	local compare
-	compare=$(semver_compare "$COMMON_VERSION" "$REQUIRED_COMMON_VERSION")
+	compare=$(semver_compare "${COMMON_VERSION}" "${REQUIRED_COMMON_VERSION}")
 
-	if [ "$compare" -eq -1 ]; then
-		echo "This script require common.sh >= v$REQUIRED_COMMON_VERSION"
-		echo "But v$COMMON_VERSION found"
-		echo "(loaded from $common_path)"
-		exit "$EX_FAIL"
+	if [[ "${compare}" -eq -1 ]]; then
+		echo "This script require common.sh >= v${REQUIRED_COMMON_VERSION}"
+		echo "But v${COMMON_VERSION} found"
+		echo "(loaded from ${common_path})"
+		exit "${EX_FAIL}"
 	fi
 
 	## --common end ##
 	if ! command -v getopt &> /dev/null; then
 		echo "This script require getopt, please install it"
-		exit "$EX_NOTFOUND"
+		exit "${EX_NOTFOUND}"
 	fi
 }
 
 ################################################################################
 # VERSION
 function version {
-	echo "$BASENAME, version $VERSION"
+	echo "${BASENAME}, version ${VERSION}"
 	## --common start ##
-	echo "common.sh, version $COMMON_VERSION"
+	echo "common.sh, version ${COMMON_VERSION}"
 	## --common end ##
 	echo
 	echo "Copyright (C) 2020-2021 Patrick Brideau"
@@ -103,15 +103,15 @@ function version {
 ################################################################################
 # USAGE
 function usage {
-	echo "Usage: $BASENAME [options] command"
+	echo "Usage: ${BASENAME} [options] command"
 	echo
 	echo "Examples:"
-	echo "  $BASENAME -vv run"
+	echo "  ${BASENAME} -vv run"
 	## --example start ##
-	echo "  $BASENAME --bar foobar run"
+	echo "  ${BASENAME} --bar foobar run"
 	## --example end ##
 	## --config start ##
-	echo "  $BASENAME --config /etc/config_file run"
+	echo "  ${BASENAME} --config /etc/config_file run"
 	## --config end ##
 	echo
 	echo "Options:"
@@ -234,13 +234,13 @@ function load_getopt_arg {
 	SHORT_OPTIONS="${!OPTIONS[*]}"
 	unset IFS
 
-	opt=$(getopt -o "$SHORT_OPTIONS" --long "$LONG_OPTIONS" -- "$@")
+	opt=$(getopt -o "${SHORT_OPTIONS}" --long "${LONG_OPTIONS}" -- "$@")
 	rc=$?
-	if [ "$rc" -ne 0 ]; then
+	if [[ "${rc}" -ne 0 ]]; then
 		log 0 "See --help for more details"
-		exit "$EX_USAGE"
+		exit "${EX_USAGE}"
 	fi
-	eval set -- "$opt"
+	eval set -- "${opt}"
 	unset opt rc
 	while true; do
 		case "$1" in
@@ -252,7 +252,7 @@ function load_getopt_arg {
 				LOG_LEVEL=3
 				;;
 			-v | --verbose)
-				LOG_LEVEL=$LOG_LEVEL+1
+				((LOG_LEVEL++))
 				;;
 			-q | --quiet)
 				LOG_LEVEL=0
@@ -296,7 +296,7 @@ function load_getopt_arg {
 				;;
 			*)
 				log 0 "No such parameter: '$1'"
-				exit "$EX_FAIL"
+				exit "${EX_FAIL}"
 				;;
 		esac
 		shift
@@ -305,8 +305,8 @@ function load_getopt_arg {
 }
 
 BASENAME=$(basename "$0")
-if [ -L "${BASH_SOURCE[0]}" ]; then
-	DIRNAME="$(dirname "$(readlink -e "${BASH_SOURCE[0]}")")"
+if [[ -L "${BASH_SOURCE[0]}" ]]; then
+	DIRNAME="$(dirname "$(readlink -e "${BASH_SOURCE[0]}" || true)")"
 else
 	DIRNAME="$(dirname "${BASH_SOURCE[0]}")"
 fi
@@ -334,19 +334,19 @@ VAR_B='default_value'
 
 ################################################################################
 # Start functions
-if [ "${BASH_SOURCE[0]}" = "${0}" ]; then
+if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
 	check_dependency
 
 	declare -a END_LOAD_ARG
 	load_getopt_arg "$@"
-	set_colors $COLORS
+	set_colors "${COLORS}"
 
 	# Remove all args out of $@, and put back only what has not been parsed
 	log 3 "args before parsing: $*"
 	set --
-	if [ "${#END_LOAD_ARG[@]}" -gt 0 ]; then
+	if [[ "${#END_LOAD_ARG[@]}" -gt 0 ]]; then
 		for arg in "${END_LOAD_ARG[@]}"; do
-			a=("$arg")
+			a=("${arg}")
 			set -- "$@" "${a[*]}"
 			unset a
 		done
@@ -359,13 +359,13 @@ if [ "${BASH_SOURCE[0]}" = "${0}" ]; then
 	log 3 "pid: $$"
 	validate_inputs
 
-	if [ $# -eq 0 ]; then
+	if [[ $# -eq 0 ]]; then
 		log 0 'No command given'
 		usage
-		exit $EX_USAGE
+		exit "${EX_USAGE}"
 	fi
 
-	if [ $# -eq 1 ]; then
+	if [[ $# -eq 1 ]]; then
 		case "$1" in
 			run)
 				main
@@ -381,12 +381,12 @@ if [ "${BASH_SOURCE[0]}" = "${0}" ]; then
 			*)
 				log 0 "No such command: $1"
 				log 0 "See --help for more details"
-				exit "$EX_USAGE"
+				exit "${EX_USAGE}"
 				;;
 		esac
 	else
 		log 0 "Too many commands given:" "$@"
 		log 0 "see --help"
-		exit "$EX_USAGE"
+		exit "${EX_USAGE}"
 	fi
 fi
