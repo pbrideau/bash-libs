@@ -635,6 +635,15 @@ function semver_compare {
 	function removeLeadingV {
 		printf "%s${1#v}"
 	}
+	function isSingleIdentifier {
+		substract="${2#?}"
+		if [[ "${1%"$2"}" == "" ]]; then
+			printf "true"
+			return 1
+		fi
+		return 0
+	}
+
 	firstParam=$1  #1.2.4-alpha.beta+METADATA
 	secondParam=$2 #1.2.4-alpha.beta.2+METADATA
 
@@ -711,15 +720,6 @@ function semver_compare {
 		outcome "-1"
 		return
 	fi
-
-	isSingleIdentifier() {
-		substract="${2#?}"
-		if [[ "${1%"$2"}" == "" ]]; then
-			printf "true"
-			return 1
-		fi
-		return 0
-	}
 
 	cursor=1
 	while [[ "${cursor}" -lt 4 ]]; do
