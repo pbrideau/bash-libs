@@ -557,13 +557,14 @@ function semver_compare {
 			string="${substract}"
 			# no more chars to compare then success
 			if [[ -z "${char}" ]]; then
-				printf "true"
-				return 1
+				#printf "true"
+				return 0
 			fi
 			# break if some of the chars is not a number
-			if [[ "$(ord "${char}" || true)" -lt 48 ]] || [[ "$(ord "${char}" || true)" -gt 57 ]]; then
-				printf "false"
-				return 0
+			ord_char=$(ord "${char}")
+			if [[ "${ord_char}" -lt 48 ]] || [[ "${ord_char}" -gt 57 ]]; then
+				#printf "false"
+				return 1
 			fi
 		done
 	}
@@ -754,12 +755,11 @@ function semver_compare {
 
 		# Spec #11.4.1
 		# Identifiers consisting of only digits are compared numerically.
-		# shellcheck disable=SC2312
-		if [[ "$(isNumber "${a}")" == true ]] || [[ "$(isNumber "${b}")" == true ]]; then
+		if isNumber "${a}" || isNumber "${b}"; then
 
 			# if both identifiers are numbers, then compare and proceed
 			# shellcheck disable=SC2312
-			if [[ "$(isNumber "${a}")" = true ]] && [[ "$(isNumber "${b}")" = true ]]; then
+			if isNumber "${a}" && isNumber "${b}"; then
 				if [[ "$(compareNumber "${a}" "${b}")" != "0" ]]; then
 					log 3 "Number is not equal $(compareNumber "${a}" "${b}")"
 					outcome "$(compareNumber "${a}" "${b}")"
@@ -768,13 +768,13 @@ function semver_compare {
 			fi
 
 			# Spec 11.4.3
-			if [[ "$(isNumber "${a}")" = "false" ]]; then
+			if ! isNumber "${a}"; then
 				log 3 "Numeric ident have lower precedence than non-numeric ident."
 				outcome "1"
 				return
 			fi
 
-			if [[ "$(isNumber "${b}")" = "false" ]]; then
+			if ! isNumber "${b}"; then
 				log 3 "Numeric ident have lower precedence than non-numeric ident."
 				outcome "-1"
 				return
