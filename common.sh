@@ -593,9 +593,10 @@ function semver_compare {
 			return
 		fi
 
-		[[ $(($2 - $1)) -gt 0 ]] && printf "%s" "-1"
-		[[ $(($2 - $1)) -lt 0 ]] && printf "1"
-		[[ $(($2 - $1)) == 0 ]] && printf "0"
+		sub=$(($2 - $1))
+		[[ "${sub}" -gt 0 ]] && printf "%s" "-1"
+		[[ "${sub}" -lt 0 ]] && printf "1"
+		[[ "${sub}" == 0 ]] && printf "0"
 	}
 	function compareString {
 		result=false
