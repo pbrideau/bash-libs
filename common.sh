@@ -686,12 +686,13 @@ function semver_compare {
 	while [[ "${cursor}" -lt 4 ]]; do
 		a=$(printf %s "${a_normalized}" | cut -d' ' -f "${cursor}")
 		b=$(printf %s "${b_normalized}" | cut -d' ' -f "${cursor}")
+		o=$(printf %s "${unit_types}" | cut -d' ' -f "${cursor}")
 		if [[ "${a}" != "${b}" ]]; then
-			log 3 "$(printf %s "${unit_types}" | cut -d' ' -f "${cursor}" || true) is different"
+			log 3 "${o} is different"
 			outcome "$(compareNumber "${a}" "${b}" || true)"
 			return
 		fi
-		log 3 "$(printf "%s" "${unit_types}" | cut -d' ' -f "${cursor}" || true) are equal"
+		log 3 "${o} are equal"
 		cursor=$((cursor + 1))
 	done
 
