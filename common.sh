@@ -33,7 +33,7 @@ export COMMON_VERSION="2023.07.27"
 #       RETURNS:
 #-------------------------------------------------------------------------------
 function log {
-	if [ "${COLORS_SET:-unset}" = "unset" ]; then
+	if [[ "${COLORS_SET:-unset}" = "unset" ]]; then
 		set_colors false
 	fi
 
@@ -41,8 +41,8 @@ function log {
 		local chkbox_type=$1
 		shift
 
-		if [ "${LOG_LEVEL:-1}" -ge 1 ]; then
-			case "$chkbox_type" in
+		if [[ "${LOG_LEVEL:-1}" -ge 1 ]]; then
+			case "${chkbox_type}" in
 				chkempty)
 					echo -en "[ ]" "$@" 1>&2
 					;;
@@ -51,6 +51,11 @@ function log {
 					;;
 				chkerr)
 					echo -e "${txtcr}${txtrst}[${bldred}✘${txtrst}]" "$@" 1>&2
+					;;
+				*)
+					# Should never get here
+					echo "Something went wrong!"
+					exit 1
 					;;
 			esac
 		fi
@@ -64,28 +69,30 @@ function log {
 		declare -i level=${1}
 		local color=""
 		shift
-		case $level in
-			0) color="$txtred" ;;
-			1) color="$txtylw" ;;
-			2) color="$txtgrn" ;;
-			3) color="$txtblu" ;;
+		case "${level}" in
+			0) color="${txtred}" ;;
+			1) color="${txtylw}" ;;
+			2) color="${txtgrn}" ;;
+			3) color="${txtblu}" ;;
+			*) color="${txtrst}" ;;
 		esac
 
 		local func_depth
-		if [ "$level" -eq 3 ]; then
-			func_depth=$(printf "==%.0s" $(seq 1 $((${#FUNCNAME[@]} - 1))))
+		if [[ "${level}" -eq 3 ]]; then
+			# shellcheck disable=SC2046 # I do want word splitting here
+			func_depth=$(printf "==%.0s" $(seq 1 $((${#FUNCNAME[@]} - 1)) || true))
 		else
 			func_depth=
 		fi
 
-		local logstr="${txtrst}[${color}${available_levels[$level]}${txtrst}]"
-		if [ "${LOG_LEVEL:-1}" -ge "$level" ]; then
+		local logstr="${txtrst}[${color}${available_levels[${level}]}${txtrst}]"
+		if [[ "${LOG_LEVEL:-1}" -ge "${level}" ]]; then
 			echo -e "${txtcr}${logstr}${func_depth}" "$@" 1>&2
 		fi
 	else
 		log 0 "log() shoud be [0-3], or (chkempty|chkok|chkerr)"
 		log 0 "'$1' given"
-		exit "$EX_FAIL"
+		exit "${EX_FAIL}"
 	fi
 }
 
@@ -105,24 +112,24 @@ function prompt_user_abort {
 	local question="Are you sure?"
 	local auto_answer=false
 	local response
-	if [ $# -eq 1 ]; then
+	if [[ $# -eq 1 ]]; then
 		question=$1
 	fi
-	if [ $# -eq 2 ]; then
+	if [[ $# -eq 2 ]]; then
 		question=$1
 		auto_answer=$2
 	fi
 
 	question="${question} [y/N] "
-	if [ "${auto_answer}" = false ]; then
+	if [[ "${auto_answer}" = false ]]; then
 		trap 'log 0 "Aborting..."' EXIT
-		read -r -p "$question" response
+		read -r -p "${question}" response
 		trap - EXIT
-		case "$response" in
+		case "${response}" in
 			[yY][eE][sS] | [yY]) ;;
 			*)
 				log 0 "Aborting..."
-				exit "$EX_ERROR"
+				exit "${EX_ERROR}"
 				;;
 		esac
 	fi
@@ -145,64 +152,64 @@ function spinner {
 	local job=$1
 	local process_name
 	local eval_process_name=false
-	if [ $# -gt 1 ]; then
+	if [[ ${#} -gt 1 ]]; then
 		process_name=$2
-		if [[ "$process_name" =~ \$ ]]; then
+		if [[ "${process_name}" =~ \$ ]]; then
 			eval_process_name=true
-			log 3 "dollar sign ($) in process_name: ${bldred}$process_name${txtrst}"
-			log 3 "Will be run by eval function: ${bldylw}$(eval echo "$2")${txtrst}"
+			log 3 "dollar sign ($) in process_name: ${bldred}${process_name}${txtrst}"
+			log 3 "Will be run by eval function: ${bldylw}$(eval echo "$2" || true)${txtrst}"
 		fi
 	else
-		process_name=$(ps -q "$job" -o comm=)
+		process_name=$(ps -q "${job}" -o comm=)
 	fi
 	local spinstr='\|/-'
-	local start_time=$SECONDS
+	local start_time="${SECONDS}"
 	declare -i run_time
 	local temp
 
-	log 3 "background job pid: $job"
-	if [ "${PARSEABLE:-true}" = true ]; then
-		log 1 "running: $process_name"
+	log 3 "background job pid: ${job}"
+	if [[ "${PARSEABLE:-true}" = true ]]; then
+		log 1 "running: ${process_name}"
 	fi
-	while ps -q "$job" &> /dev/null; do
-		if [ "${LOG_LEVEL:-1}" -ne 0 ]; then
-			if [ "$eval_process_name" = true ]; then
+	while ps -q "${job}" &> /dev/null; do
+		if [[ "${LOG_LEVEL:-1}" -ne 0 ]]; then
+			if [[ "${eval_process_name}" == true ]]; then
 				process_name=$(eval echo "$2")
 			fi
-			if [ "${PARSEABLE:-true}" = true ]; then
+			if [[ "${PARSEABLE:-true}" == true ]]; then
 				echo -n '.'
 			else
 				temp="${spinstr#?}"
 				run_time=$((SECONDS - start_time))
-				if [ "$run_time" -lt 60 ]; then
+				if [[ "${run_time}" -lt 60 ]]; then
 					printf "${txtcr}[%c] %s (%ds)" \
 						"${spinstr}" \
-						"$process_name" \
-						"$run_time"
-				elif [ "$run_time" -lt 3600 ]; then
+						"${process_name}" \
+						"${run_time}"
+				elif [[ "${run_time}" -lt 3600 ]]; then
 					printf "${txtcr}[%c] %s (%dm%02ds)" \
 						"${spinstr}" \
-						"$process_name" \
+						"${process_name}" \
 						"$((run_time / 60))" \
 						"$((run_time % 60))"
 				else
 					printf "${txtcr}[%c] %s (%dh%02dm%02ds)" \
 						"${spinstr}" \
-						"$process_name" \
+						"${process_name}" \
 						"$((run_time / 3600))" \
 						"$((run_time / 60 % 60))" \
 						"$((run_time % 60))"
 				fi
-				spinstr=${temp}${spinstr%"$temp"}
+				spinstr=${temp}${spinstr%"${temp}"}
 			fi
 		fi
 		sleep 1
 	done
-	if [ "${LOG_LEVEL:-1}" -ne 0 ] && [ "${PARSEABLE:-true}" = false ]; then
+	if [[ "${LOG_LEVEL:-1}" -ne 0 ]] && [[ "${PARSEABLE:-true}" = false ]]; then
 		local str_time
-		if [ "$run_time" -lt 60 ]; then
-			str_time=$(printf '%ds' "$run_time")
-		elif [ "$run_time" -lt 3600 ]; then
+		if [[ "${run_time}" -lt 60 ]]; then
+			str_time=$(printf '%ds' "${run_time}")
+		elif [[ "${run_time}" -lt 3600 ]]; then
 			str_time=$(printf '%dm%02ds' "$((run_time / 60))" "$((run_time % 60))")
 		else
 			str_time=$(
@@ -210,7 +217,7 @@ function spinner {
 					"$((run_time / 3600))" "$((run_time / 60 % 60))" "$((run_time % 60))"
 			)
 		fi
-		log chkok "$process_name. Done in $str_time"
+		log chkok "${process_name} Done in ${str_time}"
 	fi
 }
 
@@ -311,7 +318,7 @@ function set_colors {
 
 	export COLORS_SET=true
 
-	if [ "$colors" = true ]; then
+	if [[ "${colors}" == true ]]; then
 		if ! tty -s; then
 			log 1 "Not interractive shell, disabling colors"
 			colors=false
@@ -321,17 +328,17 @@ function set_colors {
 		fi
 	fi
 
-	if [ "$colors" = true ]; then
+	if [[ "${colors}" == true ]]; then
 		txtund=$(tput smul) # Underline
 		txtbld=$(tput bold) # Bold
 		txtrst=$(tput sgr0) # Reset
 		txtcr=$(tput cr)    # Carriage return (start of line)
 		local ncolors
 		ncolors=$(tput colors)
-		if [ -n "$ncolors" ] && [ "$ncolors" -ge 8 ]; then
+		if [[ -n "${ncolors}" ]] && [[ "${ncolors}" -ge 8 ]]; then
 			yes_colors
 		fi
-	elif [ "$colors" = "ANSI" ]; then
+	elif [[ "${colors}" = "ANSI" ]]; then
 		txtund="\033[4m" # Underline
 		txtbld="\033[1m" # Bold
 		txtrst="\033[0m" # Reset
@@ -360,27 +367,28 @@ function load_getopt_config {
 	declare -a config_files=("$@")
 	declare -i linenum=1
 	for f in "${config_files[@]}"; do
-		if [ -r "$f" ]; then
+		if [[ -r "${f}" ]]; then
 			local regex="^#"
 			while read -r line; do
-				if [[ ! "$line" =~ $regex ]]; then
+				# shellcheck disable=SC2250 # This is regex matching
+				if [[ ! "${line}" =~ $regex ]]; then
 					eval set -- "--${line}"
 					log 3 "Loading argument '$*'"
 					load_getopt_arg "$@"
-					if [ "${#END_LOAD_ARG[@]}" -gt 0 ]; then
-						log 0 "Could not parse config file ($f) correctly"
+					if [[ "${#END_LOAD_ARG[@]}" -gt 0 ]]; then
+						log 0 "Could not parse config file (${f}) correctly"
 						log 0 "Error on line ${linenum}:"
-						log 0 "> $line"
-						exit "$EX_USAGE"
+						log 0 "> ${line}"
+						exit "${EX_USAGE}"
 					fi
 				fi
 				_=$((linenum++))
-			done < "$f"
-			log 2 "Config '$f' loaded"
+			done < "${f}"
+			log 2 "Config '${f}' loaded"
 			# Load only the first config we can find, not every config files
 			break
 		fi
-		log 3 "Config '$f' does not exists"
+		log 3 "Config '${f}' does not exists"
 	done
 }
 
@@ -401,8 +409,8 @@ function basename {
 	tmp=${1%"${1##*[!/]}"}
 	tmp=${tmp##*/}
 
-	if [ $# -eq 2 ]; then
-		tmp=${tmp%"${2/"$tmp"/}"}
+	if [[ $# -eq 2 ]]; then
+		tmp=${tmp%"${2/"${tmp}"/}"}
 	fi
 
 	printf '%s\n' "${tmp:-/}"
@@ -421,14 +429,14 @@ function basename {
 function dirname {
 	local tmp=${1:-.}
 
-	[[ $tmp != *[!/]* ]] && {
+	[[ "${tmp}" != *[!/]* ]] && {
 		printf '/\n'
 		return
 	}
 
 	tmp=${tmp%%"${tmp##*[!/]}"}
 
-	[[ $tmp != */* ]] && {
+	[[ "${tmp}" != */* ]] && {
 		printf '.\n'
 		return
 	}
@@ -449,15 +457,15 @@ function dirname {
 #         USAGE:  format_date "DATE"
 #-------------------------------------------------------------------------------
 function format_date {
-	if [ "$#" -ne 1 ]; then
+	if [[ "$#" -ne 1 ]]; then
 		log 0 "format_date() require an argument, none given"
-		exit "$EX_FAIL"
+		exit "${EX_FAIL}"
 	fi
 
 	if ! date -d "$1" &> /dev/null; then
 		log 0 "format_date() argument shoud be a date, parseable with date"
 		log 0 "'$1' given"
-		exit "$EX_FAIL"
+		exit "${EX_FAIL}"
 	fi
 
 	local sec_per_minute sec_per_hour sec_per_day sec_per_month sec_per_year
@@ -473,7 +481,7 @@ function format_date {
 	now_unix="$(date +'%s')"
 	delta_s=$((now_unix - last_unix))
 
-	if [ "$delta_s" -gt 0 ]; then
+	if [[ "${delta_s}" -gt 0 ]]; then
 		if ((delta_s < sec_per_minute * 2)); then
 			echo "$((delta_s)) seconds ago"
 			return
@@ -539,16 +547,16 @@ function semver_compare {
 		string=$1
 		char=""
 		while true; do
-			substract="${string#?}"       # All but the first character of the string
-			char="${string%"$substract"}" # Remove $rest, and you're left with the first character
-			string="$substract"
+			substract="${string#?}"         # All but the first character of the string
+			char="${string%"${substract}"}" # Remove $rest, and you're left with the first character
+			string="${substract}"
 			# no more chars to compare then success
-			if [ -z "$char" ]; then
+			if [[ -z "${char}" ]]; then
 				printf "true"
 				return 1
 			fi
 			# break if some of the chars is not a number
-			if [ "$(ord "$char")" -lt 48 ] || [ "$(ord "$char")" -gt 57 ]; then
+			if [[ "$(ord "${char}" || true)" -lt 48 ]] || [[ "$(ord "${char}" || true)" -gt 57 ]]; then
 				printf "false"
 				return 0
 			fi
@@ -561,45 +569,45 @@ function semver_compare {
 		index=$2
 		cursor=-1
 		char=""
-		while [ "$cursor" != "$index" ]; do
-			substract="${string#?}"       # All but the first character of the string
-			char="${string%"$substract"}" # Remove $rest, and you're left with the first character
-			string="$substract"
+		while [[ "${cursor}" != "${index}" ]]; do
+			substract="${string#?}"         # All but the first character of the string
+			char="${string%"${substract}"}" # Remove ${rest}, and you're left with the first character
+			string="${substract}"
 			cursor=$((cursor + 1))
 		done
-		printf "%s$char"
+		printf "%s${char}"
 	}
 	function outcome {
 		result=$1
-		printf "%s$result\n"
+		printf "%s${result}\n"
 	}
 	function compareNumber {
-		if [ -z "$1" ] && [ -z "$2" ]; then
+		if [[ -z "$1" ]] && [[ -z "$2" ]]; then
 			printf "%s" "0"
 			return
 		fi
 
-		[ $(($2 - $1)) -gt 0 ] && printf "%s" "-1"
-		[ $(($2 - $1)) -lt 0 ] && printf "1"
-		[ $(($2 - $1)) = 0 ] && printf "0"
+		[[ $(($2 - $1)) -gt 0 ]] && printf "%s" "-1"
+		[[ $(($2 - $1)) -lt 0 ]] && printf "1"
+		[[ $(($2 - $1)) == 0 ]] && printf "0"
 	}
 	function compareString {
 		result=false
 		index=0
 		while true; do
-			a=$(getChar "$1" $index)
-			b=$(getChar "$2" $index)
+			a=$(getChar "$1" "${index}")
+			b=$(getChar "$2" "${index}")
 
-			if [ -z "$a" ] && [ -z "$b" ]; then
+			if [[ -z "${a}" ]] && [[ -z "${b}" ]]; then
 				printf "0"
 				return
 			fi
 
-			ord_a=$(ord "$a")
-			ord_b=$(ord "$b")
+			ord_a=$(ord "${a}")
+			ord_b=$(ord "${b}")
 
-			if [ "$(compareNumber "$ord_a" "$ord_b")" != "0" ]; then
-				printf "%s" "$(compareNumber "$ord_a" "$ord_b")"
+			if [[ "$(compareNumber "${ord_a}" "${ord_b}" || true)" != "0" ]]; then
+				printf "%s" "$(compareNumber "${ord_a}" "${ord_b}" || true)"
 				return
 			fi
 
@@ -609,7 +617,7 @@ function semver_compare {
 	function includesString {
 		string="$1"
 		substring="$2"
-		if [ "${string#*"$substring"}" != "$string" ]; then
+		if [[ "${string#*"${substring}"}" != "${string}" ]]; then
 			printf "1"
 			return 1 # $substring is in $string
 		fi
@@ -622,33 +630,35 @@ function semver_compare {
 	firstParam=$1  #1.2.4-alpha.beta+METADATA
 	secondParam=$2 #1.2.4-alpha.beta.2+METADATA
 
-	version_a=$(printf %s "$firstParam" | cut -d'+' -f 1)
-	version_a=$(removeLeadingV "$version_a")
-	version_b=$(printf %s "$secondParam" | cut -d'+' -f 1)
-	version_b=$(removeLeadingV "$version_b")
+	version_a=$(printf %s "${firstParam}" | cut -d'+' -f 1)
+	version_a=$(removeLeadingV "${version_a}")
+	version_b=$(printf %s "${secondParam}" | cut -d'+' -f 1)
+	version_b=$(removeLeadingV "${version_b}")
 
-	a_major=$(printf %s "$version_a" | cut -d'.' -f 1)
-	a_minor=$(printf %s "$version_a" | cut -d'.' -f 2)
-	a_patch=$(printf %s "$version_a" | cut -d'.' -f 3 | cut -d'-' -f 1)
+	a_major=$(printf %s "${version_a}" | cut -d'.' -f 1)
+	a_minor=$(printf %s "${version_a}" | cut -d'.' -f 2)
+	# shellcheck disable=SC2312
+	a_patch=$(printf %s "${version_a}" | cut -d'.' -f 3 | cut -d'-' -f 1)
 	a_pre=""
-	if [ "$(includesString "$version_a" -)" = 1 ]; then
-		a_pre=$(printf %s"${version_a#"$a_major"."$a_minor"."$a_patch"-}")
+	if [[ "$(includesString "${version_a}" - || true)" = 1 ]]; then
+		a_pre=$(printf %s"${version_a#"${a_major}"."${a_minor}"."${a_patch}"-}")
 	fi
 
-	b_major=$(printf %s "$version_b" | cut -d'.' -f 1)
-	b_minor=$(printf %s "$version_b" | cut -d'.' -f 2)
-	b_patch=$(printf %s "$version_b" | cut -d'.' -f 3 | cut -d'-' -f 1)
+	b_major=$(printf %s "${version_b}" | cut -d'.' -f 1)
+	b_minor=$(printf %s "${version_b}" | cut -d'.' -f 2)
+	# shellcheck disable=SC2312
+	b_patch=$(printf %s "${version_b}" | cut -d'.' -f 3 | cut -d'-' -f 1)
 	b_pre=""
-	if [ "$(includesString "$version_b" -)" = 1 ]; then
-		b_pre=$(printf %s"${version_b#"$b_major"."$b_minor"."$b_patch"-}")
+	if [[ "$(includesString "${version_b}" - || true)" = 1 ]]; then
+		b_pre=$(printf %s"${version_b#"${b_major}"."${b_minor}"."${b_patch}"-}")
 	fi
 
 	unit_types="MAJOR MINOR PATCH"
-	a_normalized="$a_major $a_minor $a_patch"
-	b_normalized="$b_major $b_minor $b_patch"
+	a_normalized="${a_major} ${a_minor} ${a_patch}"
+	b_normalized="${b_major} ${b_minor} ${b_patch}"
 
-	log 3 "Detected: $a_major $a_minor $a_patch identifiers: $a_pre"
-	log 3 "Detected: $b_major $b_minor $b_patch identifiers: $b_pre"
+	log 3 "Detected: ${a_major} ${a_minor} ${a_patch} identifiers: ${a_pre}"
+	log 3 "Detected: ${b_major} ${b_minor} ${b_patch} identifiers: ${b_pre}"
 
 	#####
 	#
@@ -656,15 +666,15 @@ function semver_compare {
 	#
 
 	cursor=1
-	while [ "$cursor" -lt 4 ]; do
-		a=$(printf %s "$a_normalized" | cut -d' ' -f $cursor)
-		b=$(printf %s "$b_normalized" | cut -d' ' -f $cursor)
-		if [ "$a" != "$b" ]; then
-			log 3 "$(printf %s "$unit_types" | cut -d' ' -f $cursor) is different"
-			outcome "$(compareNumber "$a" "$b")"
+	while [[ "${cursor}" -lt 4 ]]; do
+		a=$(printf %s "${a_normalized}" | cut -d' ' -f "${cursor}")
+		b=$(printf %s "${b_normalized}" | cut -d' ' -f "${cursor}")
+		if [[ "${a}" != "${b}" ]]; then
+			log 3 "$(printf %s "${unit_types}" | cut -d' ' -f "${cursor}" || true) is different"
+			outcome "$(compareNumber "${a}" "${b}" || true)"
 			return
 		fi
-		log 3 "$(printf "%s" "$unit_types" | cut -d' ' -f $cursor) are equal"
+		log 3 "$(printf "%s" "${unit_types}" | cut -d' ' -f "${cursor}" || true) are equal"
 		cursor=$((cursor + 1))
 	done
 
@@ -673,7 +683,7 @@ function semver_compare {
 	# Find difference between pre release identifiers
 	#
 
-	if [ -z "$a_pre" ] && [ -z "$b_pre" ]; then
+	if [[ -z "${a_pre}" ]] && [[ -z "${b_pre}" ]]; then
 		log 3 "Because both are equals"
 		outcome "0"
 		return
@@ -682,13 +692,13 @@ function semver_compare {
 	# Spec 11.3 a pre-release version has lower precedence than a normal version:
 	# Example: 1.0.0-alpha < 1.0.0.
 
-	if [ -z "$a_pre" ]; then
+	if [[ -z "${a_pre}" ]]; then
 		log 3 "Pre-release version has lower precedence than a normal version"
 		outcome "1"
 		return
 	fi
 
-	if [ -z "$b_pre" ]; then
+	if [[ -z "${b_pre}" ]]; then
 		log 3 "Pre-release version has lower precedence than a normal version"
 		outcome "-1"
 		return
@@ -696,7 +706,7 @@ function semver_compare {
 
 	isSingleIdentifier() {
 		substract="${2#?}"
-		if [ "${1%"$2"}" = "" ]; then
+		if [[ "${1%"$2"}" == "" ]]; then
 			printf "true"
 			return 1
 		fi
@@ -704,15 +714,15 @@ function semver_compare {
 	}
 
 	cursor=1
-	while [ $cursor -lt 4 ]; do
-		a=$(printf %s "$a_pre" | cut -d'.' -f $cursor)
-		b=$(printf %s "$b_pre" | cut -d'.' -f $cursor)
+	while [[ "${cursor}" -lt 4 ]]; do
+		a=$(printf %s "${a_pre}" | cut -d'.' -f "${cursor}")
+		b=$(printf %s "${b_pre}" | cut -d'.' -f "${cursor}")
 
-		log 3 "Comparing identifier $a with $b"
+		log 3 "Comparing identifier ${a} with ${b}"
 
 		# Exit when there is nothing else to compare.
 		# Most likely because they are equals
-		if [ -z "$a" ] && [ -z "$b" ]; then
+		if [[ -z "${a}" ]] && [[ -z "${b}" ]]; then
 			log 3 "are equals"
 			outcome "0"
 			return
@@ -723,7 +733,7 @@ function semver_compare {
 		# MUST be determined by comparing each dot separated identifier from left to right until a difference is found
 
 		# Spec 11.4.4: A larger set of pre-release fields has a higher precedence than a smaller set, if all of the preceding identifiers are equal.
-		if [ -n "$a" ] && [ -z "$b" ]; then
+		if [[ -n "${a}" ]] && [[ -z "${b}" ]]; then
 			# When A is larger than B
 			log 3 "Because A has more pre-identifiers"
 			outcome "1"
@@ -731,7 +741,7 @@ function semver_compare {
 		fi
 
 		# When A is shorter than B
-		if [ -z "$a" ] && [ -n "$b" ]; then
+		if [[ -z "${a}" ]] && [[ -n "${b}" ]]; then
 			log 3 "Because B has more pre-identifiers"
 			outcome "-1"
 			return
@@ -739,25 +749,27 @@ function semver_compare {
 
 		# Spec #11.4.1
 		# Identifiers consisting of only digits are compared numerically.
-		if [ "$(isNumber "$a")" = true ] || [ "$(isNumber "$b")" = true ]; then
+		# shellcheck disable=SC2312
+		if [[ "$(isNumber "${a}")" == true ]] || [[ "$(isNumber "${b}")" == true ]]; then
 
 			# if both identifiers are numbers, then compare and proceed
-			if [ "$(isNumber "$a")" = true ] && [ "$(isNumber "$b")" = true ]; then
-				if [ "$(compareNumber "$a" "$b")" != "0" ]; then
-					log 3 "Number is not equal $(compareNumber "$a" "$b")"
-					outcome "$(compareNumber "$a" "$b")"
+			# shellcheck disable=SC2312
+			if [[ "$(isNumber "${a}")" = true ]] && [[ "$(isNumber "${b}")" = true ]]; then
+				if [[ "$(compareNumber "${a}" "${b}")" != "0" ]]; then
+					log 3 "Number is not equal $(compareNumber "${a}" "${b}")"
+					outcome "$(compareNumber "${a}" "${b}")"
 					return
 				fi
 			fi
 
 			# Spec 11.4.3
-			if [ "$(isNumber "$a")" = "false" ]; then
+			if [[ "$(isNumber "${a}")" = "false" ]]; then
 				log 3 "Numeric ident have lower precedence than non-numeric ident."
 				outcome "1"
 				return
 			fi
 
-			if [ "$(isNumber "$b")" = "false" ]; then
+			if [[ "$(isNumber "${b}")" = "false" ]]; then
 				log 3 "Numeric ident have lower precedence than non-numeric ident."
 				outcome "-1"
 				return
@@ -765,19 +777,19 @@ function semver_compare {
 		else
 			# Spec 11.4.2
 			# Identifiers with letters or hyphens are compared lexically in ASCII sort order.
-			if [ "$(compareString "$a" "$b")" != "0" ]; then
+			if [[ "$(compareString "${a}" "${b}")" != "0" ]]; then
 				log 3 "cardinal is not equal $(compareString a b)"
-				outcome "$(compareString "$a" "$b")"
+				outcome "$(compareString "${a}" "${b}")"
 				return
 			fi
 		fi
 
 		# Edge case when there is single identifier exaple: x.y.z-beta
-		if [ "$cursor" = 1 ]; then
+		if [[ "${cursor}" = 1 ]]; then
 
 			# When both versions are single return equals
-			if [ -n "$(isSingleIdentifier "$b_pre" "$b")" ]; then
-				if [ -n "$(isSingleIdentifier "$a_pre" "$a")" ]; then
+			if [[ -n "$(isSingleIdentifier "${b_pre}" "${b}" || true)" ]]; then
+				if [[ -n "$(isSingleIdentifier "${a_pre}" "${a}" || true)" ]]; then
 					log 3 "Because both have single identifier"
 					outcome "0"
 					return
@@ -788,8 +800,8 @@ function semver_compare {
 			# Spec 11.4.4: A larger set of pre-release fields has a higher precedence than a smaller set, if all of the preceding identifiers are equal.
 
 			# When A is larger than B
-			if [ -n "$(isSingleIdentifier "$b_pre" "$b")" ]; then
-				if [ -z "$(isSingleIdentifier "$a_pre" "$a")" ]; then
+			if [[ -n "$(isSingleIdentifier "${b_pre}" "${b}" || true)" ]]; then
+				if [[ -z "$(isSingleIdentifier "${a_pre}" "${a}" || true)" ]]; then
 					log 3 "Because of single identifier, A has more pre-identifiers"
 					outcome "1"
 					return
@@ -797,8 +809,8 @@ function semver_compare {
 			fi
 
 			# When A is shorter than B
-			if [ -z "$(isSingleIdentifier "$b_pre" "$b")" ]; then
-				if [ -n "$(isSingleIdentifier "$a_pre" "$a")" ]; then
+			if [[ -z "$(isSingleIdentifier "${b_pre}" "${b}" || true)" ]]; then
+				if [[ -n "$(isSingleIdentifier "${a_pre}" "${a}" || true)" ]]; then
 					log 3 "Because of single identifier, B has more pre-identifiers"
 					outcome "-1"
 					return
@@ -828,13 +840,13 @@ function on_exit {
 	function __run_on_exit {
 		log 3 "${FUNCNAME[0]}()"
 		for i in "${ON_EXIT_ITEMS[@]}"; do
-			log 3 "running: $i"
-			eval "$i"
+			log 3 "running: ${i}"
+			eval "${i}"
 		done
 	}
 	local n=${#ON_EXIT_ITEMS[*]}
 	ON_EXIT_ITEMS[n]="$*"
-	if [[ $n -eq 0 ]]; then
+	if [[ "${n}" -eq 0 ]]; then
 		log 3 "Setting trap __run_on_exit()"
 		trap __run_on_exit EXIT
 	fi
