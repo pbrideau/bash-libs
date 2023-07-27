@@ -382,6 +382,26 @@ function Should_ReturnMinusOne_When_AAlphaLowerThanB { #@test
 	[ "$status" -eq 0 ]
 	[ "${lines[0]}" = "-1" ]
 }
+function Should_ReturnMinusOne_When_AAlphaLowerThanBBeta { #@test
+	# Given
+
+	# When
+	run semver_compare "1.0.0-alpha" "1.0.0-beta"
+
+	# Then
+	[ "$status" -eq 0 ]
+	[ "${lines[0]}" = "-1" ]
+}
+function Should_ReturnMinusOne_When_SmallAAlphaLowerThanBigBBeta { #@test
+	# Given
+
+	# When
+	run semver_compare "0.9.9-alpha" "1.0.0-beta"
+
+	# Then
+	[ "$status" -eq 0 ]
+	[ "${lines[0]}" = "-1" ]
+}
 
 function Should_ReturnZero_When_ElementInArray { #@test
 	# Given
