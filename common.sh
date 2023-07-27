@@ -142,10 +142,14 @@ function prompt_user_abort {
 #                 LOG_LEVEL
 #    PARAMETERS:  1) pid of process to listen to
 #                 2) Name of the process to display (optional)
+#                    (This can be a command to run every second)
 #        OUTPUT:  spinner
 #       RETURNS:
 #         USAGE:  sleep 10 &
 #                 spinner $! job_name
+#
+#                 sleep 10 &
+#                 spinner $! "\$(date +%s)" #will show current epoch
 #-------------------------------------------------------------------------------
 function spinner {
 	log 3 "${FUNCNAME[0]}()"
