@@ -383,6 +383,51 @@ function Should_ReturnMinusOne_When_AAlphaLowerThanB { #@test
 	[ "${lines[0]}" = "-1" ]
 }
 
+function Should_ReturnZero_When_ElementInArray { #@test
+	# Given
+	declare -a array
+	array=('foo' 'bar' 'baz')
+
+	# When
+	run is_in_array 'foo' "${array[@]}"
+
+	# Then
+	[ "$status" -eq 0 ]
+}
+function Should_ReturnOne_When_ElementNotInArray { #@test
+	# Given
+	declare -a array
+	array=('bar' 'baz')
+
+	# When
+	run is_in_array 'foo' "${array[@]}"
+
+	# Then
+	[ "$status" -eq 1 ]
+}
+function Should_ReturnZero_When_ElementInRegexArray { #@test
+	# Given
+	declare -a array
+	array=('.*\.bar$' '.*/.baz$')
+
+	# When
+	run is_in_regex_array 'foo.bar' "${array[@]}"
+
+	# Then
+	[ "$status" -eq 0 ]
+}
+function Should_ReturnOne_When_ElementNotInRegexArray { #@test
+	# Given
+	declare -a array
+	array=('.*\.bar$' '.*/.baz$')
+
+	# When
+	run is_in_regex_array 'bar.foo' "${array[@]}"
+
+	# Then
+	[ "$status" -eq 1 ]
+}
+
 #Clean up if something went wrong
 function teardown {
 	rm -f /tmp/fileToRemoveOnExit

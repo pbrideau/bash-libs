@@ -17,7 +17,7 @@
 # You can get the lastest version here:
 # https://github.com/pbrideau/bash-libs
 
-export COMMON_VERSION="2023.03.16"
+export COMMON_VERSION="2023.07.27"
 
 #---  FUNCTION  ----------------------------------------------------------------
 #          NAME:  log
@@ -839,6 +839,59 @@ function on_exit {
 		trap __run_on_exit EXIT
 	fi
 	log 3 "Trap '$*' added on exit"
+}
+
+#---  FUNCTION  ----------------------------------------------------------------
+#          NAME:  is_in_array
+#   DESCRIPTION:  check if element is in array
+#       GLOBALS:
+#    PARAMETERS:  1) string: element to search for
+#                 2) array: array to search in
+#        OUTPUT:
+#       RETURNS:  0 when element is in array
+#                 1 when element is NOT in array
+#         USAGE:  declare -a array=('foo' 'bar' 'baz')
+#                 is_in_array 'foo' "${array[@]}"
+#-------------------------------------------------------------------------------
+function is_in_array {
+	local item=$1
+	shift
+	declare -a array=("$@")
+
+	for e in "${array[@]}"; do
+		if [[ "${item}" == "${e}" ]]; then
+			return
+		fi
+	done
+
+	return 1
+}
+
+#---  FUNCTION  ----------------------------------------------------------------
+#          NAME:  is_in_regex_array
+#   DESCRIPTION:  check if element is in regex array
+#       GLOBALS:
+#    PARAMETERS:  1) string: element to search for
+#                 2) array: array of regex to search in
+#        OUTPUT:
+#       RETURNS:  0 when element is in regex array
+#                 1 when element is NOT in regex array
+#         USAGE:  declare -a array=('.*\.bar$' '.*\.baz$')
+#                 is_in_array 'foo.bar' "${array[@]}"
+#-------------------------------------------------------------------------------
+function is_in_regex_array {
+	local item=$1
+	shift
+	declare -a array=("$@")
+
+	for r in "${array[@]}"; do
+		# shellcheck disable=SC2250 # This is regex matching
+		if [[ "${item}" =~ $r ]]; then
+			return
+		fi
+	done
+
+	return 1
 }
 
 # Reserved return codes
