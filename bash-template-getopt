@@ -6,7 +6,7 @@
 #       CREATED: ---
 #      REVISION: ---
 #===============================================================================
-# template: 2023.07.27
+# template: 2023.07.28
 VERSION="0.0.1"
 ## --common start ##
 REQUIRED_COMMON_VERSION="" #should be populated by genbash during generation
@@ -356,7 +356,6 @@ if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
 	load_getopt_config "${CONFIG_FILES[@]}"
 	## --config end ##
 	log 3 "pid: $$"
-	validate_inputs
 
 	if [[ $# -eq 0 ]]; then
 		log 0 'No command given'
@@ -367,6 +366,7 @@ if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
 	if [[ $# -eq 1 ]]; then
 		case "$1" in
 			run)
+				validate_inputs
 				main
 				;;
 			## --example start ##
