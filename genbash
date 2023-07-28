@@ -9,10 +9,12 @@
 #                0.1.1: Add /usr/local search path for common.sh
 #                0.1.2: Use /usr/bin/env bash instead of /bin/bash
 #                0.1.3: Use on_exit() instead of trap
+#                0.1.4: Refactor as bash-template-getopt model
+#                       Fix style to be strick with shellcheck (-o all)
 #===============================================================================
 # template: 2021.01.29
-VERSION="0.1.3"
-REQUIRED_COMMON_VERSION="2021.05.27"
+VERSION="0.1.4"
+REQUIRED_COMMON_VERSION="2023.07.28"
 
 set -o nounset   # Treat unset variable as an error
 shopt -s extglob # Extended pattern matching
@@ -29,49 +31,49 @@ function check_dependency {
 	local common_path=""
 	local search_common_path=(
 		"${DIRNAME}/common.sh"
-		"$HOME/.local/lib/bash-libs/common.sh"
+		"${HOME}/.local/lib/bash-libs/common.sh"
 		"/usr/local/lib/bash-libs/common.sh"
 	)
 
 	for p in "${search_common_path[@]}"; do
-		if [ -f "$p" ]; then
+		if [[ -f "${p}" ]]; then
 			# shellcheck source=./common.sh
-			source "$p"
-			common_path="$p"
+			source "${p}"
+			common_path="${p}"
 			break
 		fi
 	done
 
-	if [ "$common_path" = "" ]; then
+	if [[ "${common_path}" == "" ]]; then
 		echo "Could not find common.sh:"
 		for p in "${search_common_path[@]}"; do
-			echo "  $p"
+			echo "  ${p}"
 		done
 		echo "You could find it on: https://github.com/pbrideau/bash-libs"
 		exit 1
 	fi
 
 	local compare
-	compare=$(semver_compare "$COMMON_VERSION" "$REQUIRED_COMMON_VERSION")
+	compare=$(semver_compare "${COMMON_VERSION}" "${REQUIRED_COMMON_VERSION}")
 
-	if [ "$compare" -eq -1 ]; then
-		echo "This script require common.sh >= v$REQUIRED_COMMON_VERSION"
-		echo "But v$COMMON_VERSION found"
-		echo "(loaded from $common_path)"
-		exit "$EX_FAIL"
+	if [[ "${compare}" -eq -1 ]]; then
+		echo "This script require common.sh >= v${REQUIRED_COMMON_VERSION}"
+		echo "But v${COMMON_VERSION} found"
+		echo "(loaded from ${common_path})"
+		exit "${EX_FAIL}"
 	fi
 
 	if ! command -v getopt &> /dev/null; then
 		echo "This script require getopt, please install it"
-		exit "$EX_NOTFOUND"
+		exit "${EX_NOTFOUND}"
 	fi
 }
 
 ################################################################################
 # VERSION
 function version {
-	echo "$BASENAME, version $VERSION"
-	echo "common.sh, version $COMMON_VERSION"
+	echo "${BASENAME}, version ${VERSION}"
+	echo "common.sh, version ${COMMON_VERSION}"
 	echo
 	echo "Copyright (C) 2020-2021 Patrick Brideau"
 	echo
@@ -92,11 +94,11 @@ function version {
 ################################################################################
 # USAGE
 function usage {
-	echo "Usage: $BASENAME [options] Target"
+	echo "Usage: ${BASENAME} [options] Target"
 	echo
 	echo "Examples:"
-	echo "  $BASENAME --config my_new_script"
-	echo "  $BASENAME --config /home/foobar/my_new_script"
+	echo "  ${BASENAME} --config my_new_script"
+	echo "  ${BASENAME} --config /home/foobar/my_new_script"
 	echo
 	echo "Options:"
 	echo "   -h, --help                Show this message"
@@ -128,55 +130,57 @@ function usage {
 function main {
 	log 3 "========== function ${FUNCNAME[0]}"
 
-	log 2 "Generating bash script : $TARGET_TEMPLATE"
+	log 2 "Generating bash script : ${TARGET_TEMPLATE}"
 
-	cp "$BASH_TEMPLATE_PATH" "$TARGET_TEMPLATE"
-	chmod +x "$TARGET_TEMPLATE"
+	cp "${BASH_TEMPLATE_PATH}" "${TARGET_TEMPLATE}"
+	chmod +x "${TARGET_TEMPLATE}"
 
-	reformat_template 'set-e' "$REMOVE_SETE"
-	reformat_template 'common' "$REMOVE_COMMON"
-	reformat_template 'config' "$REMOVE_CONFIG"
-	reformat_template 'example' "$REMOVE_EXAMPLE"
-	reformat_template 'parseable' "$REMOVE_PARSEABLE"
-	reformat_template 'yes' "$REMOVE_YES"
-	reformat_template 'sigusr' "$REMOVE_SIGUSR"
+	reformat_template 'set-e' "${REMOVE_SETE}"
+	reformat_template 'common' "${REMOVE_COMMON}"
+	reformat_template 'config' "${REMOVE_CONFIG}"
+	reformat_template 'example' "${REMOVE_EXAMPLE}"
+	reformat_template 'parseable' "${REMOVE_PARSEABLE}"
+	reformat_template 'yes' "${REMOVE_YES}"
+	reformat_template 'sigusr' "${REMOVE_SIGUSR}"
 
-	sed -i -re "s/CREATED: ---/CREATED: $(date +%F)/" "$TARGET_TEMPLATE"
+	local fulldate
+	fulldate=$(date +%F)
+	sed -i -re "s/CREATED: ---/CREATED: ${fulldate}/" "${TARGET_TEMPLATE}"
 
-	if [ -n "${AUTHOR:-}" ]; then
-		sed -i -re "s/AUTHOR: ---/AUTHOR: $AUTHOR/" "$TARGET_TEMPLATE"
+	if [[ -n "${AUTHOR:-}" ]]; then
+		sed -i -re "s/AUTHOR: ---/AUTHOR: ${AUTHOR}/" "${TARGET_TEMPLATE}"
 	fi
 
-	if [ "$REMOVE_COMMON" = true ]; then
+	if [[ "${REMOVE_COMMON}" = true ]]; then
 		insert_common_functions
 		insert_common_retcode
 	else
 		local ver
-		ver=$(awk -F "=" '/COMMON_VERSION/ {print $2}' "$BASH_COMMON")
-		sed -i -re "s/(REQUIRED_COMMON_VERSION=).*/\1$ver/" "$TARGET_TEMPLATE"
+		ver=$(awk -F "=" '/COMMON_VERSION/ {print $2}' "${BASH_COMMON}")
+		sed -i -re "s/(REQUIRED_COMMON_VERSION=).*/\1${ver}/" "${TARGET_TEMPLATE}"
 
 		sed -i -re "/^[[:space:]]*## --common insert ##/d" \
 			-e "/^[[:space:]]*## --common retcode ##/d" \
-			"$TARGET_TEMPLATE"
+			"${TARGET_TEMPLATE}"
 	fi
 
 	# shellcheck disable=SC2154
 	# bldgrn and txtrst are defined in common.sh but shellcheck cannot find them
-	log chkok "${bldgrn}$TARGET_TEMPLATE${txtrst} created successfully"
+	log chkok "${bldgrn}${TARGET_TEMPLATE}${txtrst} created successfully"
 }
 
 function reformat_template {
 	local arg_to_replace=$1
 	local remove=$2
-	if [ "$remove" = true ]; then
+	if [[ "${remove}" = true ]]; then
 		sed -i -re " \
 			/^[[:space:]]*## --${arg_to_replace} start ##/, \
 			/^[[:space:]]*## --${arg_to_replace} end ##/d" \
-			"$TARGET_TEMPLATE"
+			"${TARGET_TEMPLATE}"
 	else
 		sed -i -re "/^[[:space:]]*## --${arg_to_replace} start ##/d" \
 			-e "/^[[:space:]]*## --${arg_to_replace} end ##/d" \
-			"$TARGET_TEMPLATE"
+			"${TARGET_TEMPLATE}"
 	fi
 }
 
@@ -185,113 +189,116 @@ function insert_common_retcode {
 	num_regex='([0-9]|[1-9][0-9]|1[01][0-9]|12[0-7])'
 
 	tmp_file=$(mktemp)
-	on_exit "rm -f $tmp_file"
+	on_exit "rm -f ${tmp_file}"
 
-	sed -nr "/.*EX_[A-Z]*=${num_regex}[^0-9]+/p" "$BASH_COMMON" > "$tmp_file"
+	sed -nr "/.*EX_[A-Z]*=${num_regex}[^0-9]+/p" "${BASH_COMMON}" > "${tmp_file}"
 	sed -i "/## --common retcode ##/ {
 			h
-			r $tmp_file
+			r ${tmp_file}
 			g
 			N
-		}" "$TARGET_TEMPLATE"
+		}" "${TARGET_TEMPLATE}"
 
-	sed -i -re "/^[[:space:]]*## --common retcode ##/d" "$TARGET_TEMPLATE"
-	rm "$tmp_file"
+	sed -i -re "/^[[:space:]]*## --common retcode ##/d" "${TARGET_TEMPLATE}"
+	rm "${tmp_file}"
 }
 
 function insert_common_functions {
 	local ver
-	ver=$(awk -F "=" '/COMMON_VERSION/ {print $2}' "$BASH_COMMON")
-	log 3 "Version of common.sh is $ver"
+	ver=$(awk -F "=" '/COMMON_VERSION/ {print $2}' "${BASH_COMMON}")
+	log 3 "Version of common.sh is ${ver}"
 
 	log 3 "Inserting log() and set_colors() functions"
 	local tmp_file
 	tmp_file=$(mktemp)
-	on_exit "rm -f $tmp_file"
+	on_exit "rm -f ${tmp_file}"
 
-	sed -n '/^function log {$/,/^}$/p' "$BASH_COMMON" >> "$tmp_file"
-	sed -n '/^function set_colors {$/,/^}$/p' "$BASH_COMMON" >> "$tmp_file"
+	sed -n '/^function log {$/,/^}$/p' "${BASH_COMMON}" >> "${tmp_file}"
+	sed -n '/^function set_colors {$/,/^}$/p' "${BASH_COMMON}" >> "${tmp_file}"
 
-	sed -i "/^function log {$/ a #from COMMON_VERSION=$ver" "$tmp_file"
-	sed -i "/^function set_colors {$/ a #from COMMON_VERSION=$ver" "$tmp_file"
+	sed -i "/^function log {$/ a #from COMMON_VERSION=${ver}" "${tmp_file}"
+	sed -i "/^function set_colors {$/ a #from COMMON_VERSION=${ver}" "${tmp_file}"
 
 	sed -i "/## --common insert ##/ {
 			h
-			r $tmp_file
+			r ${tmp_file}
 			g
 			N
-		}" "$TARGET_TEMPLATE"
+		}" "${TARGET_TEMPLATE}"
 
-	sed -i -re "/^[[:space:]]*## --common insert ##/d" "$TARGET_TEMPLATE"
-	rm "$tmp_file"
+	sed -i -re "/^[[:space:]]*## --common insert ##/d" "${TARGET_TEMPLATE}"
+	rm "${tmp_file}"
 }
 
 function validate_inputs {
 	log 3 "========== function ${FUNCNAME[0]}"
 
-	if [ -e "$TARGET_TEMPLATE" ]; then
-		log 0 "File '$TARGET_TEMPLATE' already exists"
-		exit "$EX_ERROR"
+	if [[ -e "${TARGET_TEMPLATE}" ]]; then
+		log 0 "File '${TARGET_TEMPLATE}' already exists"
+		exit "${EX_ERROR}"
 	fi
 
-	if [ "$REMOVE_COMMON" = true ]; then
+	if [[ "${REMOVE_COMMON}" = true ]]; then
 		log 1 'Function log() and set_colors() are required'
 		log 1 'They will be added inline in your script'
 		prompt_user_abort 'Do you want to continue?'
 	fi
 
-	if [ -z "${AUTHOR:-}" ]; then
+	if [[ -z "${AUTHOR:-}" ]]; then
 		log 1 "No author configured"
-		log 1 "You can add 'AUTHOR=\"Foo Bar\"' in $GENBASH_CONFIG"
+		log 1 "You can add 'AUTHOR=\"Foo Bar\"' in ${GENBASH_CONFIG}"
 		prompt_user_abort "Do you want to continue?"
 	fi
 
-	if ! touch "$TARGET_TEMPLATE" &> /dev/null; then
-		log 0 "Cannot write to '$TARGET_TEMPLATE'"
-		exit "$EX_ERROR"
+	if ! touch "${TARGET_TEMPLATE}" &> /dev/null; then
+		log 0 "Cannot write to '${TARGET_TEMPLATE}'"
+		exit "${EX_ERROR}"
 	fi
 
-	TARGET_TEMPLATE=$(readlink -f "$TARGET_TEMPLATE")
+	TARGET_TEMPLATE=$(readlink -f "${TARGET_TEMPLATE}")
 
 	log 3 "Locating bash-template"
-	case "$BASH_TEMPLATE" in
+	case "${BASH_TEMPLATE}" in
 		getopt)
-			if [ -e "${DIRNAME}/bash-template-getopt" ]; then
+			if [[ -e "${DIRNAME}/bash-template-getopt" ]]; then
 				BASH_TEMPLATE_PATH="${DIRNAME}/bash-template-getopt"
-			elif [ -e "${HOME}/.local/share/bash-libs/bash-template-getopt" ]; then
+			elif [[ -e "${HOME}/.local/share/bash-libs/bash-template-getopt" ]]; then
 				BASH_TEMPLATE_PATH="${HOME}/.local/share/bash-libs/bash-template-getopt"
 			else
 				log 0 "Could not locate bash-template"
 				log 0 "Was ${BASENAME} installed correctly?"
-				exit "$EX_FAIL"
+				exit "${EX_FAIL}"
 			fi
 			;;
 		docopt)
-			if [ -e "${DIRNAME}/bash-template-docopt" ]; then
+			if [[ -e "${DIRNAME}/bash-template-docopt" ]]; then
 				BASH_TEMPLATE_PATH="${DIRNAME}/bash-template-docopt"
-			elif [ -e "${HOME}/.local/share/bash-libs/bash-template-docopt" ]; then
+			elif [[ -e "${HOME}/.local/share/bash-libs/bash-template-docopt" ]]; then
 				BASH_TEMPLATE_PATH="${HOME}/.local/share/bash-libs/bash-template-docopt"
 			else
 				log 0 "Could not locate bash-template-docopts"
 				log 0 "Was ${BASENAME} installed correctly?"
-				exit "$EX_FAIL"
+				exit "${EX_FAIL}"
 			fi
 			;;
-
+		*)
+			log 0 "could not parse undefined '${BASH_TEMPLATE}'"
+			exit "${EX_FAIL}"
+			;;
 	esac
 
 	log 3 "Locating common.sh"
-	if [ -e "${DIRNAME}/common.sh" ]; then
+	if [[ -e "${DIRNAME}/common.sh" ]]; then
 		BASH_COMMON="${DIRNAME}/common.sh"
-	elif [ -e "${HOME}/.local/lib/bash-libs/common.sh" ]; then
+	elif [[ -e "${HOME}/.local/lib/bash-libs/common.sh" ]]; then
 		BASH_COMMON="${HOME}/.local/lib/bash-libs/common.sh"
 	else
 		log 0 "Could not locate common.sh"
 		log 0 "Was ${BASENAME} installed correctly?"
-		exit "$EX_FAIL"
+		exit "${EX_FAIL}"
 	fi
 
-	if [ "$REMOVE_EXAMPLE" = false ]; then
+	if [[ "${REMOVE_EXAMPLE}" = false ]]; then
 		log 1 "Note that --examples requires the following:"
 		log 1 "  --common"
 		log 1 "  --yes"
@@ -300,7 +307,7 @@ function validate_inputs {
 
 ################################################################################
 # ARGS PARSE
-function load_arg {
+function load_getopt_arg {
 	declare -A OPTIONS=(
 		['h']='help'
 		['d']='debug'
@@ -328,12 +335,13 @@ function load_arg {
 	SHORT_OPTIONS="${!OPTIONS[*]}"
 	unset IFS
 
-	opt=$(getopt -o "$SHORT_OPTIONS" --long "$LONG_OPTIONS" -- "$@")
+	opt=$(getopt -o "${SHORT_OPTIONS}" --long "${LONG_OPTIONS}" -- "$@")
 	rc=$?
-	if [ "$rc" -ne 0 ]; then
-		exit "$EX_USAGE"
+	if [[ "${rc}" -ne 0 ]]; then
+		log 0 "See --help for more details"
+		exit "${EX_USAGE}"
 	fi
-	eval set -- "$opt"
+	eval set -- "${opt}"
 	unset opt rc
 	while true; do
 		case "$1" in
@@ -345,7 +353,7 @@ function load_arg {
 				LOG_LEVEL=3
 				;;
 			-v | --verbose)
-				LOG_LEVEL=$LOG_LEVEL+1
+				((LOG_LEVEL++))
 				;;
 			-q | --quiet)
 				LOG_LEVEL=0
@@ -389,7 +397,7 @@ function load_arg {
 				;;
 			*)
 				log 0 "No such parameter: '$1'"
-				exit "$EX_FAIL"
+				exit "${EX_FAIL}"
 				;;
 		esac
 		shift
@@ -398,19 +406,19 @@ function load_arg {
 }
 
 BASENAME=$(basename "$0")
-if [ -L "${BASH_SOURCE[0]}" ]; then
-	DIRNAME="$(dirname "$(readlink -e "${BASH_SOURCE[0]}")")"
+if [[ -L "${BASH_SOURCE[0]}" ]]; then
+	DIRNAME="$(dirname "$(readlink -e "${BASH_SOURCE[0]}" || true)")"
 else
 	DIRNAME="$(dirname "${BASH_SOURCE[0]}")"
 fi
 export COLORS=true
 declare -gi LOG_LEVEL=1
-GENBASH_CONFIG="$HOME/.genbashrc"
+GENBASH_CONFIG="${HOME}/.genbashrc"
 BASH_TEMPLATE="getopt"
 
-if [ -e "$GENBASH_CONFIG" ]; then
+if [[ -e "${GENBASH_CONFIG}" ]]; then
 	# shellcheck disable=SC1090
-	source "$GENBASH_CONFIG"
+	source "${GENBASH_CONFIG}"
 fi
 
 REMOVE_SETE=true
@@ -423,34 +431,39 @@ REMOVE_SIGUSR=true
 
 ################################################################################
 # Start functions
-if [ "${BASH_SOURCE[0]}" = "${0}" ]; then
+if [[ "${BASH_SOURCE[0]}" = "${0}" ]]; then
 	check_dependency
-	set_colors false
 
-	declare -a END_LOAD_ARG
-	load_arg "$@"
-	eval set --
-	if [ "${#END_LOAD_ARG[@]}" -gt 0 ]; then
+	load_getopt_arg "$@"
+	set_colors "${COLORS}"
+
+	# Remove all args out of $@, and put back only what has not been parsed
+	log 3 "args before parsing: $*"
+	set --
+	if [[ "${#END_LOAD_ARG[@]}" -gt 0 ]]; then
 		for arg in "${END_LOAD_ARG[@]}"; do
-			eval set -- "$@" "'$arg'"
+			a=("${arg}")
+			set -- "$@" "${a[*]}"
+			unset a
 		done
 	fi
+	log 3 "remaining args after parsing: $*"
 
-	set_colors $COLORS
+	log 3 "pid: $$"
 
-	if [ $# -eq 0 ]; then
+	if [[ $# -eq 0 ]]; then
 		log 0 'No target given'
 		usage
-		exit $EX_USAGE
+		exit "${EX_USAGE}"
 	fi
 
-	if [ $# -eq 1 ]; then
+	if [[ $# -eq 1 ]]; then
 		TARGET_TEMPLATE=$1
 		validate_inputs
 		main
 	else
 		log 0 "Too many target given:" "$@"
 		log 0 "see --help"
-		exit "$EX_USAGE"
+		exit "${EX_USAGE}"
 	fi
 fi
