@@ -958,3 +958,8 @@ export EX_SIGWINCH=156  # Window resize signal (4.3BSD, Sun)
 export EX_SIGIO=157     # I/O now possible (4.2BSD)
 export EX_SIGPWR=158    # Power failure (System V)
 export EX_SIGSYS=159    # Bad system call (SVr4)
+
+# Custom return codes
+# Limit user-defined exit codes to the range 64-113
+# See /usr/include/sysexits.h for common examples
+export EX_USAGE=64 # Command line usage error
