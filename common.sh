@@ -17,7 +17,7 @@
 # You can get the lastest version here:
 # https://github.com/pbrideau/bash-libs
 
-export COMMON_VERSION="2023.07.27"
+export COMMON_VERSION="2023.07.28"
 
 #---  FUNCTION  ----------------------------------------------------------------
 #          NAME:  log
@@ -367,6 +367,7 @@ function set_colors {
 #        OUTPUT:  Debug or error logs
 #       RETURNS:
 #-------------------------------------------------------------------------------
+declare -a END_LOAD_ARG
 function load_getopt_config {
 	log 3 "${FUNCNAME[0]}()"
 	declare -a config_files=("$@")
