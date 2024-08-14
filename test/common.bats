@@ -18,7 +18,7 @@ function Should_LogErrorToStderr_When_Log0 { #@test
 
 	# Then
 	[ "$status" -eq 0 ]
-	[ "${lines[0]}" = "$(tput cr)[error] Error" ]
+	[ "${lines[0]}" = "[error] Error" ]
 	# No way to check if it's stdout or stderr with bats...
 	# Assume it's in stderr
 }
@@ -31,7 +31,7 @@ function Should_LogWarningToStderr_When_Log1 { #@test
 
 	# Then
 	[ "$status" -eq 0 ]
-	[ "${lines[0]}" = "$(tput cr)[warn ] Warning" ]
+	[ "${lines[0]}" = "[warn ] Warning" ]
 }
 function Should_LogInfoToStderr_When_Log2 { #@test
 	# Given
@@ -42,7 +42,7 @@ function Should_LogInfoToStderr_When_Log2 { #@test
 
 	# Then
 	[ "$status" -eq 0 ]
-	[ "${lines[0]}" = "$(tput cr)[info ] Info" ]
+	[ "${lines[0]}" = "[info ] Info" ]
 }
 function Should_LogDebugToStderr_When_Log3 { #@test
 	# Given
@@ -53,7 +53,7 @@ function Should_LogDebugToStderr_When_Log3 { #@test
 
 	# Then
 	[ "$status" -eq 0 ]
-	[ "${lines[0]}" = "$(tput cr)[debug]========== Debug" ]
+	[ "${lines[0]}" = "[debug]========== Debug" ]
 	# Note this debug run 4 funtions deep within the bats stack
 	# This is why there is this much '=='
 }
