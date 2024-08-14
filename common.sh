@@ -327,6 +327,10 @@ function set_colors {
 		if ! tty -s; then
 			log 1 "Not interractive shell, disabling colors"
 			colors=false
+		elif [[ "$(lsof -a -p $$ -d 1 -F 2> /dev/null || true)" =~ npipe ]]; then
+			log 1 "piped output detected, disabling colors"
+			txtcr=
+			colors=false
 		elif ! command -v tput &> /dev/null; then
 			log 1 "tput command not found, ANSI escape code will be used"
 			colors=ANSI
