@@ -535,7 +535,7 @@ function format_date {
 }
 
 #---  FUNCTION  ----------------------------------------------------------------
-#          NAME:  compare_semver
+#          NAME:  semver_compare
 #   DESCRIPTION:  Check if first version is greater than second version
 #                 https://github.com/Ariel-Rodriguez/sh-semversion-2/blob/main/semver2.sh
 #       GLOBALS:
@@ -545,7 +545,7 @@ function format_date {
 #       RETURNS:  1 when A greater than B
 #                 0 when A equals B
 #                 -1 when A lower than B
-#         USAGE:  compare_semver '1.2.3' '4.5.6'
+#         USAGE:  semver_compare '1.2.3' '4.5.6'
 #-------------------------------------------------------------------------------
 function semver_compare {
 	function ord {
