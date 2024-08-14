@@ -17,7 +17,7 @@
 # You can get the lastest version here:
 # https://github.com/pbrideau/bash-libs
 
-export COMMON_VERSION="2024.08.14"
+export COMMON_VERSION="2024.08.15"
 
 #---  FUNCTION  ----------------------------------------------------------------
 #          NAME:  log
