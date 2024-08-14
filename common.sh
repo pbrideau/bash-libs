@@ -19,6 +19,13 @@
 
 export COMMON_VERSION="2024.08.15"
 
+# Make sure we set PARSEABLE=true when not in interactive shell
+if ! tty -s; then
+	PARSEABLE=true
+elif [[ "$(lsof -a -p $$ -d 1 -F 2> /dev/null || true)" =~ npipe ]]; then
+	PARSEABLE=true
+fi
+
 #---  FUNCTION  ----------------------------------------------------------------
 #          NAME:  log
 #   DESCRIPTION:  Output message to stderr
@@ -44,13 +51,24 @@ function log {
 		if [[ "${LOG_LEVEL:-1}" -ge 1 ]]; then
 			case "${chkbox_type}" in
 				chkempty)
-					echo -en "[ ]" "$@" 1>&2
+					# Only output the empty checkbox when we are in interactive shell
+					if [[ "${PARSEABLE:-false}" == false ]]; then
+						echo -en "[ ]" "$@" 1>&2
+					fi
 					;;
 				chkok)
-					echo -e "${txtcr}${txtrst}[${bldgrn}✔${txtrst}]" "$@" 1>&2
+					if [[ "${PARSEABLE:-false}" == false ]]; then
+						echo -e "${txtcr}${txtrst}[${bldgrn}✔${txtrst}]" "$@" 1>&2
+					else
+						echo -e "[✔]" "$@" 1>&2
+					fi
 					;;
 				chkerr)
-					echo -e "${txtcr}${txtrst}[${bldred}✘${txtrst}]" "$@" 1>&2
+					if [[ "${PARSEABLE:-false}" == false ]]; then
+						echo -e "${txtcr}${txtrst}[${bldred}✘${txtrst}]" "$@" 1>&2
+					else
+						echo -e "[✘]" "$@" 1>&2
+					fi
 					;;
 				*)
 					# Should never get here
@@ -173,7 +191,7 @@ function spinner {
 	local temp
 
 	log 3 "background job pid: ${job}"
-	if [[ "${PARSEABLE:-true}" = true ]]; then
+	if [[ "${PARSEABLE:-false}" = true ]]; then
 		log 1 "running: ${process_name}"
 	fi
 	while ps -q "${job}" &> /dev/null; do
@@ -181,7 +199,7 @@ function spinner {
 			if [[ "${eval_process_name}" == true ]]; then
 				process_name=$(eval echo "$2")
 			fi
-			if [[ "${PARSEABLE:-true}" == true ]]; then
+			if [[ "${PARSEABLE:-false}" == true ]]; then
 				echo -n '.'
 			else
 				temp="${spinstr#?}"
@@ -210,7 +228,7 @@ function spinner {
 		fi
 		sleep 1
 	done
-	if [[ "${LOG_LEVEL:-1}" -ne 0 ]] && [[ "${PARSEABLE:-true}" = false ]]; then
+	if [[ "${LOG_LEVEL:-1}" -ne 0 ]] && [[ "${PARSEABLE:-false}" = false ]]; then
 		local str_time
 		if [[ "${run_time}" -lt 60 ]]; then
 			str_time=$(printf '%ds' "${run_time}")
@@ -318,18 +336,14 @@ function set_colors {
 	txtund=
 	txtbld=
 	txtrst=
-	txtcr="\r"
+	txtcr=
 	no_colors
 
 	export COLORS_SET=true
 
 	if [[ "${colors}" == true ]]; then
-		if ! tty -s; then
-			log 1 "Not interractive shell, disabling colors"
-			colors=false
-		elif [[ "$(lsof -a -p $$ -d 1 -F 2> /dev/null || true)" =~ npipe ]]; then
-			log 1 "piped output detected, disabling colors"
-			txtcr=
+		if [[ "${PARSEABLE:-false}" == true ]]; then
+			log 1 "Not interactive shell, disabling colors"
 			colors=false
 		elif ! command -v tput &> /dev/null; then
 			log 1 "tput command not found, ANSI escape code will be used"
