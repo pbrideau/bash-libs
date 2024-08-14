@@ -171,7 +171,7 @@ function main {
 function slp {
 	log 3 "${FUNCNAME[0]}()"
 	sleep 1 &
-	spinner $! sleeping
+	spinner $! 'Background task (sleep)'
 	log 2 'Finished'
 }
 
