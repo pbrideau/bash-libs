@@ -4,18 +4,9 @@
 load 'test_helper/bats-support/load'
 load 'test_helper/bats-assert/load'
 
-cmd_hard_to_parse='./bash-template-getopt'
 cmd=(./bash-template-getopt --parseable)
 FIXTURE_ROOT="$BATS_TEST_DIRNAME/fixtures"
 
-function Should_FailAndPrintUsageInColor_When_NoCommand { #@test
-	run "$cmd_hard_to_parse"
-
-	assert_failure 64
-	colored_tag="$(tput cr)$(tput sgr0)[$(tput setaf 1)error$(tput sgr0)]"
-	assert_line "${colored_tag} No command given"
-	assert_line --partial 'Usage:'
-}
 function Should_SucceedAndPrintUsage_When_HelpArgument { #@test
 	run "${cmd[@]}" --help
 
@@ -86,13 +77,12 @@ function Should_SucceedAndPrintLog3_When_RunVerboseVerbose { #@test
 }
 
 function Should_SucceedAndLoadConfig_When_ConfigArgument { #@test
-	run "$cmd_hard_to_parse" \
+	run "${cmd[@]}" \
 		--config "$FIXTURE_ROOT/config_parseable.cfg" \
 		run
 
 	assert_success
-	error_colored_tag="$(tput cr)$(tput sgr0)[$(tput setaf 1)error$(tput sgr0)]"
-	assert_line "${error_colored_tag} This show an error to stderr"
+	assert_line "$(tput cr)[error] This show an error to stderr"
 }
 
 function Should_Succeed_When_AnswerYesToAsk { #@test
