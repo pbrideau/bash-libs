@@ -87,7 +87,7 @@ function log {
 
 		local logstr="${txtrst}[${color}${available_levels[${level}]}${txtrst}]"
 		if [[ "${LOG_LEVEL:-1}" -ge "${level}" ]]; then
-			echo -e "${txtcr}${logstr}${func_depth}" "$@" 1>&2
+			echo -e "${logstr}${func_depth}" "$@" 1>&2
 		fi
 	else
 		log 0 "log() shoud be [0-3], or (chkempty|chkok|chkerr)"
