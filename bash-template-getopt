@@ -180,6 +180,12 @@ function ask_user {
 	prompt_user_abort "Do you want to continue?" "$ALWAYS_YES"
 	log 2 "Finished"
 }
+
+function chkbox {
+	log chkempty "This will show empty box"
+	sleep 1
+	log chkok "This will show empty box (Until the sleep is done)"
+}
 ## --example end ##
 
 function validate_inputs {
@@ -375,6 +381,9 @@ if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
 				;;
 			ask)
 				ask_user
+				;;
+			chkbox)
+				chkbox
 				;;
 			## --example end ##
 			*)
