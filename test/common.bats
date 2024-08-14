@@ -78,6 +78,7 @@ function Should_LogEmptyCheckbox_When_EmptyCheckbox { #@test
 function Should_LogFailedCheckbox_When_ErrorCheckbox { #@test
 
 	# When
+	run log chkempty 'Foo'
 	run log chkerr 'Foo bar'
 
 	# Then
@@ -87,6 +88,7 @@ function Should_LogFailedCheckbox_When_ErrorCheckbox { #@test
 function Should_LogSuccessCheckbox_When_OkCheckbox { #@test
 
 	# When
+	run log chkempty 'Foo'
 	run log chkok 'Foo bar'
 
 	# Then
