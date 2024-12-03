@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Copyright (C) 2020-2021 Patrick Brideau
+# Copyright (C) 2020-2024 Patrick Brideau
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -17,7 +17,7 @@
 # You can get the lastest version here:
 # https://github.com/pbrideau/bash-libs
 
-export COMMON_VERSION="2024.08.15"
+export COMMON_VERSION="2024.12.03"
 
 # Make sure we set PARSEABLE=true when not in interactive shell
 if ! tty -s; then
@@ -391,28 +391,34 @@ function load_getopt_config {
 	declare -a config_files=("$@")
 	declare -i linenum=1
 	for f in "${config_files[@]}"; do
-		if [[ -r "${f}" ]]; then
-			local regex="^#"
-			while read -r line; do
-				# shellcheck disable=SC2250 # This is regex matching
-				if [[ ! "${line}" =~ $regex ]]; then
-					eval set -- "--${line}"
-					log 3 "Loading argument '$*'"
-					load_getopt_arg "$@"
-					if [[ "${#END_LOAD_ARG[@]}" -gt 0 ]]; then
-						log 0 "Could not parse config file (${f}) correctly"
-						log 0 "Error on line ${linenum}:"
-						log 0 "> ${line}"
-						exit "${EX_USAGE}"
+		if [[ -e "${f}" ]]; then
+			if [[ -r "${f}" ]]; then
+				local regex="^#"
+				while read -r line; do
+					# shellcheck disable=SC2250 # This is regex matching
+					if [[ ! "${line}" =~ $regex ]]; then
+						eval set -- "--${line}"
+						log 3 "Loading argument '$*'"
+						load_getopt_arg "$@"
+						if [[ "${#END_LOAD_ARG[@]}" -gt 0 ]]; then
+							log 0 "Could not parse config file (${f}) correctly"
+							log 0 "Error on line ${linenum}:"
+							log 0 "> ${line}"
+							exit "${EX_USAGE}"
+						fi
 					fi
-				fi
-				_=$((linenum++))
-			done < "${f}"
-			log 2 "Config '${f}' loaded"
-			# Load only the first config we can find, not every config files
-			break
+					_=$((linenum++))
+				done < "${f}"
+				log 2 "Config '${f}' loaded"
+				# Load only the first config we can find, not every config files
+				break
+			else
+				log 1 "Cannot read config '${f}' (do you have permission to do so?)"
+				log 1 "It might cause you problems"
+			fi
+		else
+			log 3 "Config '${f}' does not exists, skipping"
 		fi
-		log 3 "Config '${f}' does not exists"
 	done
 }
 

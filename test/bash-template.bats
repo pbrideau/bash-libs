@@ -84,6 +84,17 @@ function Should_SucceedAndLoadConfig_When_ConfigArgument { #@test
 	assert_success
 	assert_line "[error] This show an error to stderr"
 }
+function Should_SucceedAndShowWarning_When_ConfigArgumentNotReadable { #@test
+	local f="/$FIXTURE_ROOT/config_notreadable.cfg"
+	touch "$f"
+	chmod 000 "$f"
+	run "${cmd[@]}" \
+		--config "$f" \
+		run
+
+	assert_success
+	assert_line --partial "[warn ] Cannot read config '${f}'"
+}
 
 function Should_Succeed_When_AnswerYesToAsk { #@test
 	run "${cmd[@]}" ask <<< 'yes'
@@ -118,4 +129,8 @@ function Should_Succeed_When_AskInNonInteractiveShellAlwaysYesArgument { #@test
 		# Then
 		assert_success
 	}
+}
+
+function teardown {
+	rm -f "/$FIXTURE_ROOT/config_notreadable.cfg"
 }
